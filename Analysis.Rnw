@@ -1,0 +1,110 @@
+\documentclass{article}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+<<echo=FALSE>>=
+library("gplots")
+DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
+
+tmp=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Fixations[grep("Joint",DF_Fixations$primary.AOI),],FUN=sum)
+tmp2=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Fixations,FUN=sum)
+
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+
+fit=aov(Event.Duration..ms..x/Event.Duration..ms..y ~ Trial*Condition, data=tmp3)
+summary(fit)
+
+plotmeans(Event.Duration..ms..x/Event.Duration..ms..y ~interaction(Condition,Trial),data=tmp3)
+
+
+
+DF_Dwell=read.csv("/home//chili/Desktop/DF_Dwells",sep=",")
+
+tmp=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],FUN=length)
+tmp2=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Dwell,FUN=length)
+
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+
+fit=aov(Event.Duration..ms..x/Event.Duration..ms..y ~ Trial*Condition, data=tmp3)
+summary(fit)
+
+plotmeans(Event.Duration..ms..x/Event.Duration..ms..y ~interaction(Condition,Trial),data=tmp3)
+interaction.plot(tmp3$Trial,tmp3$Condition,tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y )
+
+
+
+tmp=aggregate (Event.Duration..ms.  ~ primary.AOI+Participant+Trial+Condition,data=DF_Dwell,FUN=length)
+tmp2=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Dwell,FUN=length)
+
+
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+
+tmp4=subset(tmp3,Trial==7)
+par(las=2)
+plotmeans(tmp4$Event.Duration..ms..x/tmp4$Event.Duration..ms..y~ interaction(tmp4$Condition,tmp4$primary.AOI))
+
+
+fit=aov(Event.Duration..ms..x/Event.Duration..ms..y ~ Trial*Condition, data=subset(tmp3,Trial==4))
+summary(fit)
+
+
+plotmeans(Event.Duration..ms..x/Event.Duration..ms..y ~interaction(Condition,Trial),data=tmp3)
+interaction.plot(tmp3$Trial,tmp3$Condition,tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y )
+
+@
+
+Check the ranking of the AOIs
+<<>>=
+DF_Dwells_Rank=read.csv("Desktop/DF_Dwells_Rank",sep = ",")
+plotmeans(Rank~Condition,data=subset(DF_Dwells_Rank,Trial==4 & AOI=="JointD"))
+wilcox.test(Rank~Condition,data=subset(DF_Dwells_Rank,Trial==2 & AOI=="JointD"));
+@
+<<>>=
+DF_Dwells_Rank_10sec=read.csv("Desktop/DF_Dwells_Rank_10sec",sep = ",")
+plotmeans(Rank~interaction(Condition,AOI),data=subset(DF_Dwells_Rank_10sec,Trial==4))
+wilcox.test(Rank~Condition,data=subset(DF_Dwells_Rank,Trial==2 & AOI=="JointD"));
+@
+
+it seems that there are some differences in the way number of AOI the explore during the experiment. In tangible condition, it is slightly lower.
+<<>>=
+tmp=aggregate(AOI ~ Participant+Trial+Condition,data=DF_Dwells_Rank,FUN=length)
+plotmeans(AOI~interaction(Condition,Trial),data=tmp)
+tmp2=subset(tmp,Trial==3)
+
+chisq.test(tmp2$AOI,tmp2$Condition)
+fisher.test(tmp2$AOI,tmp2$Condition)
+
+prop.test(x=c(128,170), n=c(428,682),alternative="two.sided", conf.level=.99)
+
+tmp=aggregate(AOI ~ Participant+Trial+Condition,data=DF_Dwells_Rank[grep("Joint",DF_Dwells_Rank$AOI,invert = FALSE),],FUN=length)
+plotmeans(AOI~interaction(Condition,Trial),data=tmp)
+
+tmp=aggregate(AOI ~ Participant+Trial+Condition,data=DF_Dwells_Rank_10sec,FUN=length)
+plotmeans(AOI~interaction(Condition,Trial),data=tmp)
+
+
+
+@
+
+
+
+
+In this chunck, the proportion of dwells on each beam is plotted. The distribution of dwells seems to be similar between the groups
+<<>>=
+
+tmp=aggregate (Event.Duration..ms. ~ primary.AOI+Participant+Trial+Condition,data=DF_Dwell,FUN=length)
+tmp2=aggregate(Event.Duration..ms. ~ Participant+Trial+Condition,data=DF_Dwell,FUN=length)
+
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+
+tmp4=subset(tmp3,Trial==1)
+
+par(las=2)
+plotmeans(tmp4$Event.Duration..ms..x/tmp4$Event.Duration..ms..y~ interaction(tmp4$Condition,tmp4$primary.AOI))
+@
+
+
+
+
+\end{document}
