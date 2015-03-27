@@ -3,106 +3,1181 @@
 \begin{document}
 \SweaveOpts{concordance=TRUE}
 
-<<echo=FALSE>>=
-library("gplots")
+****************************Elimitae non valid AOI************* 
 DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
+AOI_table=read.csv("Desktop/AOI_table.csv",sep=",")
+colnames(DF_Fixations)[7]="AOI"
+DF_Fixations=merge(DF_Fixations, AOI_table,by=c("Trial","AOI"),all=T)
+data=subset(DF_Fixations,is.na(DF_Fixations$Distance))
+
+
+
+HYP1:Checking the duration: the durations are usually non-normally distributed.
+The whole experiment singnificantly took less in tangible condition.
+In task 3,5,6(0.056),7,8 tehre is a significant difference between the conditions. Probably it is an effect of the manipulation temptetion, or game temptation in  this contex.
+
+<<>>=
+DF_Duration=read.csv("Desktop/DF_Duration", sep=",")
+
+
+
+tmp=aggregate(Duration~Condition+Participant,data=DF_Duration,FUN=sum)
+hist(tmp$Duration)
+plotmeans(tmp$Duration~tmp$Condition)
+shapiro.test(subset(tmp, Condition=="tangible")$Duration)
+shapiro.test(subset(tmp, Condition=="static")$Duration)
+bartlett.test(Duration ~ Condition, data=tmp)
+kruskal.test(Duration~Condition, data=tmp)
+
+plotmeans(Duration~interaction(Condition,Trial),data=DF_Duration)
+
+shapiro.test(subset(DF_Duration,Trial==1 & Condition=="tangible")$Duration)
+shapiro.test(subset(DF_Duration,Trial==1 & Condition=="static")$Duration)
+bartlett.test(Duration ~ Condition, data=subset(DF_Duration,Trial==1))
+wilcox.test(Duration~Condition, data=subset(DF_Duration,Trial==1))
+
+shapiro.test(subset(DF_Duration,Trial==2 & Condition=="tangible")$Duration)
+shapiro.test(subset(DF_Duration,Trial==2 & Condition=="static")$Duration)
+bartlett.test(Duration ~ Condition, data=subset(DF_Duration,Trial==2))
+wilcox.test(Duration~Condition, data=subset(DF_Duration,Trial==2))
+
+shapiro.test(subset(DF_Duration,Trial==3 & Condition=="tangible")$Duration)
+shapiro.test(subset(DF_Duration,Trial==3 & Condition=="static")$Duration)
+bartlett.test(Duration ~ Condition, data=subset(DF_Duration,Trial==3))
+kruskal.test(Duration~Condition, data=subset(DF_Duration,Trial==3))
+
+shapiro.test(subset(DF_Duration,Trial==4 & Condition=="tangible")$Duration)
+shapiro.test(subset(DF_Duration,Trial==4 & Condition=="static")$Duration)
+bartlett.test(Duration ~ Condition, data=subset(DF_Duration,Trial==4))
+kruskal.test(Duration~Condition, data=subset(DF_Duration,Trial==4))
+
+shapiro.test(subset(DF_Duration,Trial==5 & Condition=="tangible")$Duration)
+shapiro.test(subset(DF_Duration,Trial==5 & Condition=="static")$Duration)
+bartlett.test(Duration ~ Condition, data=subset(DF_Duration,Trial==5))
+summary(aov(Duration~Condition, data=subset(DF_Duration,Trial==5)))
+
+shapiro.test(subset(DF_Duration,Trial==6 & Condition=="tangible")$Duration)
+shapiro.test(subset(DF_Duration,Trial==6 & Condition=="static")$Duration)
+bartlett.test(Duration ~ Condition, data=subset(DF_Duration,Trial==6))
+oneway.test(Duration~Condition, data=subset(DF_Duration,Trial==6))
+
+shapiro.test(subset(DF_Duration,Trial==7 & Condition=="tangible")$Duration)
+shapiro.test(subset(DF_Duration,Trial==7 & Condition=="static")$Duration)
+bartlett.test(Duration ~ Condition, data=subset(DF_Duration,Trial==7))
+oneway.test(Duration~Condition, data=subset(DF_Duration,Trial==7),var.equal = T)
+
+
+shapiro.test(subset(DF_Duration,Trial==8 & Condition=="tangible")$Duration)
+shapiro.test(subset(DF_Duration,Trial==8 & Condition=="static")$Duration)
+bartlett.test(Duration ~ Condition, data=subset(DF_Duration,Trial==8))
+kruskal.test(Duration~Condition, data=subset(DF_Duration,Trial==8))
+
+@
+
+No difference between learners and non-learners
+<<>>=
+DF_Duration=read.csv("Desktop/DF_Duration", sep=",")
+DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_Duration=merge(DF_Duration,DF_Learner,by=c("Participant"))
+
+DF_Duration[grep("0",DF_Duration$Learner),6]="no"
+DF_Duration[grep("1",DF_Duration$Learner),6]="yes"
+
+
+tmp=aggregate(Duration~Learner+Participant,data=DF_Duration,FUN=sum)
+hist(tmp$Duration)
+plotmeans(tmp$Duration~tmp$Learner)
+shapiro.test(subset(tmp, Learner=="no")$Duration)
+shapiro.test(subset(tmp, Learner=="yes")$Duration)
+bartlett.test(Duration ~ Learner, data=tmp)
+kruskal.test(Duration~as.factor(Learner), data=tmp)
+
+plotmeans(Duration~interaction(Learner,Trial),data=DF_Duration)
+
+shapiro.test(subset(DF_Duration,Trial==1 & Learner=="no")$Duration)
+shapiro.test(subset(DF_Duration,Trial==1 & Learner=="yes")$Duration)
+bartlett.test(Duration ~ Learner, data=subset(DF_Duration,Trial==1))
+kruskal.test(Duration~as.factor(Learner), data=subset(DF_Duration,Trial==1))
+
+shapiro.test(subset(DF_Duration,Trial==2 & Learner=="no")$Duration)
+shapiro.test(subset(DF_Duration,Trial==2 & Learner=="yes")$Duration)
+bartlett.test(Duration ~ Learner, data=subset(DF_Duration,Trial==2))
+wilcox.test(Duration~Learner, data=subset(DF_Duration,Trial==2))
+
+shapiro.test(subset(DF_Duration,Trial==3 & Learner=="no")$Duration)
+shapiro.test(subset(DF_Duration,Trial==3 & Learner=="yes")$Duration)
+bartlett.test(Duration ~ Learner, data=subset(DF_Duration,Trial==3))
+wilcox.test(Duration~Learner, data=subset(DF_Duration,Trial==3))
+
+shapiro.test(subset(DF_Duration,Trial==4 & Learner=="no")$Duration)
+shapiro.test(subset(DF_Duration,Trial==4 & Learner=="yes")$Duration)
+bartlett.test(Duration ~ Learner, data=subset(DF_Duration,Trial==4))
+oneway.test(Duration~Learner, data=subset(DF_Duration,Trial==4),var.equal = T)
+
+shapiro.test(subset(DF_Duration,Trial==5 & Learner=="no")$Duration)
+shapiro.test(subset(DF_Duration,Trial==5 & Learner=="yes")$Duration)
+bartlett.test(Duration ~ Learner, data=subset(DF_Duration,Trial==5))
+oneway.test(Duration~Learner, data=subset(DF_Duration,Trial==5),var.equal = T)
+
+shapiro.test(subset(DF_Duration,Trial==6 & Learner=="no")$Duration)
+shapiro.test(subset(DF_Duration,Trial==6 & Learner=="yes")$Duration)
+bartlett.test(Duration ~ Learner, data=subset(DF_Duration,Trial==6))
+kruskal.test(Duration~as.factor(Learner), data=subset(DF_Duration,Trial==6))
+
+shapiro.test(subset(DF_Duration,Trial==7 & Learner=="no")$Duration)
+shapiro.test(subset(DF_Duration,Trial==7 & Learner=="yes")$Duration)
+bartlett.test(Duration ~ Learner, data=subset(DF_Duration,Trial==7))
+oneway.test(Duration~Learner, data=subset(DF_Duration,Trial==7),var.equal = T)
+
+
+shapiro.test(subset(DF_Duration,Trial==8 & Learner=="no")$Duration)
+shapiro.test(subset(DF_Duration,Trial==8 & Learner=="yes")$Duration)
+bartlett.test(Duration ~ Learner, data=subset(DF_Duration,Trial==8))
+wilcox.test(Duration~Learner, data=subset(DF_Duration,Trial==8))
+
+@
+
+HYP2:No difference in total fixation time
+<<>>=
+DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
+tmp=aggregate(Event.Duration..ms. ~ Participant+Condition,data=DF_Fixations,FUN=sum)
+
+hist(tmp$Event.Duration..ms.)
+plotmeans(tmp$Event.Duration..ms.~tmp$Condition)
+
+shapiro.test(subset(tmp, Condition=="tangible")$Event.Duration..ms.)
+shapiro.test(subset(tmp, Condition=="static")$Event.Duration..ms.)
+bartlett.test(Event.Duration..ms. ~ Condition, data=tmp)
+oneway.test(Event.Duration..ms.~Condition, data=tmp)
+tmp=aggregate(Event.Duration..ms. ~ Participant+Trial+Condition,data=DF_Fixations,FUN=sum)
+
+plotmeans(Event.Duration..ms.~interaction(Condition,Trial),data=tmp)
+@
+
+ 
+<<>>=
+DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
+DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_Fixations=merge(DF_Fixations,DF_Learner,by=c("Participant"))
+
+DF_Fixations[grep("0",DF_Fixations$Learner),10]="no"
+DF_Fixations[grep("1",DF_Fixations$Learner),10]="yes"
+
+tmp=aggregate(Event.Duration..ms. ~ Participant+Condition+Learner,data=DF_Fixations,FUN=sum)
+
+hist(tmp$Event.Duration..ms.)
+plotmeans(tmp$Event.Duration..ms.~tmp$Learner)
+
+shapiro.test(subset(tmp, Learner=="yes")$Event.Duration..ms.)
+shapiro.test(subset(tmp, Learner=="no")$Event.Duration..ms.)
+bartlett.test(Event.Duration..ms. ~ Learner, data=tmp)
+wilcox.test(Event.Duration..ms.~Learner, data=tmp)
+
+tmp=aggregate(Event.Duration..ms. ~ Participant+Trial+Condition+Learner,data=DF_Fixations,FUN=sum)
+
+plotmeans(Event.Duration..ms.~interaction(Learner,Trial),data=tmp)
+
+shapiro.test(subset(tmp,Trial==1 & Learner=="no")$Event.Duration..ms.)
+shapiro.test(subset(tmp,Trial==1 & Learner=="yes")$Event.Duration..ms.)
+bartlett.test(Event.Duration..ms. ~ Learner, data=subset(tmp,Trial==1))
+oneway.test(Event.Duration..ms.~as.factor(Learner), data=subset(tmp,Trial==1),var.equal = T)
+
+
+shapiro.test(subset(tmp,Trial==2 & Learner=="no")$Event.Duration..ms.)
+shapiro.test(subset(tmp,Trial==2 & Learner=="yes")$Event.Duration..ms.)
+bartlett.test(Event.Duration..ms. ~ Learner, data=subset(tmp,Trial==2))
+wilcox.test(Event.Duration..ms.~as.factor(Learner), data=subset(tmp,Trial==2))
+
+shapiro.test(subset(tmp,Trial==3 & Learner=="no")$Event.Duration..ms.)
+shapiro.test(subset(tmp,Trial==3 & Learner=="yes")$Event.Duration..ms.)
+bartlett.test(Event.Duration..ms. ~ Learner, data=subset(tmp,Trial==3))
+wilcox.test(Event.Duration..ms.~as.factor(Learner), data=subset(tmp,Trial==3))
+
+shapiro.test(subset(tmp,Trial==4 & Learner=="no")$Event.Duration..ms.)
+shapiro.test(subset(tmp,Trial==4 & Learner=="yes")$Event.Duration..ms.)
+bartlett.test(Event.Duration..ms. ~ Learner, data=subset(tmp,Trial==4))
+oneway.test(Event.Duration..ms.~as.factor(Learner), data=subset(tmp,Trial==4),var.eq=T)
+
+shapiro.test(subset(tmp,Trial==5 & Learner=="no")$Event.Duration..ms.)
+shapiro.test(subset(tmp,Trial==5 & Learner=="yes")$Event.Duration..ms.)
+bartlett.test(Event.Duration..ms. ~ Learner, data=subset(tmp,Trial==5))
+oneway.test(Event.Duration..ms.~as.factor(Learner), data=subset(tmp,Trial==5),var.eq=T)
+
+shapiro.test(subset(tmp,Trial==6 & Learner=="no")$Event.Duration..ms.)
+shapiro.test(subset(tmp,Trial==6 & Learner=="yes")$Event.Duration..ms.)
+bartlett.test(Event.Duration..ms. ~ Learner, data=subset(tmp,Trial==6))
+oneway.test(Event.Duration..ms.~as.factor(Learner), data=subset(tmp,Trial==6),var.eq=T)
+
+
+shapiro.test(subset(tmp,Trial==7 & Learner=="no")$Event.Duration..ms.)
+shapiro.test(subset(tmp,Trial==7 & Learner=="yes")$Event.Duration..ms.)
+bartlett.test(Event.Duration..ms. ~ Learner, data=subset(tmp,Trial==7))
+oneway.test(Event.Duration..ms.~as.factor(Learner), data=subset(tmp,Trial==7),var.eq=T)
+@
+
+HYP2.1:La percetuale di tempo su fixation ü piu alta in tangible. Nei primi 4 trial è significativa.
+<<>>=
+DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
+DF_Duration=read.csv("Desktop/DF_Duration", sep=",")
+
+tmp=aggregate(Event.Duration..ms. ~ Participant+Condition,data=DF_Fixations,FUN=sum)
+tmp2=aggregate(Duration ~ Participant+Condition,data=DF_Duration,FUN=sum)
+tmp=merge(tmp,tmp2, by=c("Participant","Condition"))
+
+hist(tmp$Event.Duration..ms./tmp$Duration)
+
+plotmeans(tmp$Event.Duration..ms./tmp$Duration~tmp$Condition)
+
+wilcox.test(Event.Duration..ms./Duration~Condition, data=tmp)
+
+tmp=aggregate(Event.Duration..ms. ~ Participant+Trial+Condition,data=DF_Fixations,FUN=sum)
+tmp=merge(tmp,DF_Duration, by=c("Participant","Condition","Trial"))
+
+plotmeans(Event.Duration..ms./Duration~interaction(Condition,Trial),data=tmp)
+
+wilcox.test(Event.Duration..ms./Duration~Condition, data=subset(tmp,Trial==1))
+wilcox.test(Event.Duration..ms./Duration~Condition, data=subset(tmp,Trial==2))
+wilcox.test(Event.Duration..ms./Duration~Condition, data=subset(tmp,Trial==3))
+wilcox.test(Event.Duration..ms./Duration~Condition, data=subset(tmp,Trial==4))
+wilcox.test(Event.Duration..ms./Duration~Condition, data=subset(tmp,Trial==5))
+wilcox.test(Event.Duration..ms./Duration~Condition, data=subset(tmp,Trial==6))
+wilcox.test(Event.Duration..ms./Duration~Condition, data=subset(tmp,Trial==7))
+
+@
+
+No differenyza tra learners.
+<<>>=
+DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
+DF_Duration=read.csv("Desktop/DF_Duration", sep=",")
+DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_Fixations=merge(DF_Fixations,DF_Learner,by=c("Participant"))
+DF_Duration=merge(DF_Duration,DF_Learner,by=c("Participant"))
+
+DF_Fixations[grep("0",DF_Fixations$Learner),10]="no"
+DF_Fixations[grep("1",DF_Fixations$Learner),10]="yes"
+
+DF_Duration[grep("0",DF_Duration$Learner),6]="no"
+DF_Duration[grep("1",DF_Duration$Learner),6]="yes"
+
+tmp=aggregate(Event.Duration..ms. ~ Participant+Learner,data=DF_Fixations,FUN=sum)
+tmp2=aggregate(Duration ~ Participant+Learner,data=DF_Duration,FUN=sum)
+tmp=merge(tmp,tmp2, by=c("Participant","Learner"))
+
+hist(tmp$Event.Duration..ms./tmp$Duration)
+
+plotmeans(tmp$Event.Duration..ms./tmp$Duration~tmp$Learner)
+
+wilcox.test(Event.Duration..ms./Duration~Learner, data=tmp)
+
+tmp=aggregate(Event.Duration..ms. ~ Participant+Trial+Condition+Learner,data=DF_Fixations,FUN=sum)
+tmp=merge(tmp,DF_Duration, by=c("Participant","Condition","Trial","Learner"))
+
+plotmeans(Event.Duration..ms./Duration~interaction(Learner,Trial),data=tmp)
+
+wilcox.test(Event.Duration..ms./Duration~Learner, data=subset(tmp,Trial==1))
+wilcox.test(Event.Duration..ms./Duration~Learner, data=subset(tmp,Trial==2))
+wilcox.test(Event.Duration..ms./Duration~Learner, data=subset(tmp,Trial==3))
+wilcox.test(Event.Duration..ms./Duration~Learner, data=subset(tmp,Trial==4))
+wilcox.test(Event.Duration..ms./Duration~Learner, data=subset(tmp,Trial==5))
+wilcox.test(Event.Duration..ms./Duration~Learner, data=subset(tmp,Trial==6))
+wilcox.test(Event.Duration..ms./Duration~Learner, data=subset(tmp,Trial==7))
+
+@
+
+
+HYP3:It seems that in tngible they allocate less percent of fixation time to the joints. Summing up all the trial, the significance is 0.004 (r=0.56). Significant for most of the trials.
+<<echo=FALSE>>=
+DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
+tmp=aggregate(Event.Duration..ms.  ~ Participant+Condition,data=DF_Fixations[grep("Joint",DF_Fixations$primary.AOI),],FUN=sum)
+tmp2=aggregate(Event.Duration..ms.  ~ Participant+Condition,data=DF_Fixations,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Condition"))
+tmp3$Perc=tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y
+plotmeans(Event.Duration..ms..x/Event.Duration..ms..y ~Condition,data=tmp3)
+wilcox.test(Event.Duration..ms..x/Event.Duration..ms..y ~Condition,data=tmp3)
+wilcox_test( tmp3$Perc ~ tmp3$Condition,distribution="exact")
+effect_size=2.7713/sqrt(24)
+
 
 tmp=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Fixations[grep("Joint",DF_Fixations$primary.AOI),],FUN=sum)
 tmp2=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Fixations,FUN=sum)
-
 tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
-
-fit=aov(Event.Duration..ms..x/Event.Duration..ms..y ~ Trial*Condition, data=tmp3)
-summary(fit)
-
 plotmeans(Event.Duration..ms..x/Event.Duration..ms..y ~interaction(Condition,Trial),data=tmp3)
-
-
-
-DF_Dwell=read.csv("/home//chili/Desktop/DF_Dwells",sep=",")
-
-tmp=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],FUN=length)
-tmp2=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Dwell,FUN=length)
-
-tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
-
-fit=aov(Event.Duration..ms..x/Event.Duration..ms..y ~ Trial*Condition, data=tmp3)
-summary(fit)
-
-plotmeans(Event.Duration..ms..x/Event.Duration..ms..y ~interaction(Condition,Trial),data=tmp3)
-interaction.plot(tmp3$Trial,tmp3$Condition,tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y )
-
-
-
-tmp=aggregate (Event.Duration..ms.  ~ primary.AOI+Participant+Trial+Condition,data=DF_Dwell,FUN=length)
-tmp2=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Dwell,FUN=length)
-
-
-tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
-
-tmp4=subset(tmp3,Trial==7)
-par(las=2)
-plotmeans(tmp4$Event.Duration..ms..x/tmp4$Event.Duration..ms..y~ interaction(tmp4$Condition,tmp4$primary.AOI))
-
-
-fit=aov(Event.Duration..ms..x/Event.Duration..ms..y ~ Trial*Condition, data=subset(tmp3,Trial==4))
-summary(fit)
-
-
-plotmeans(Event.Duration..ms..x/Event.Duration..ms..y ~interaction(Condition,Trial),data=tmp3)
-interaction.plot(tmp3$Trial,tmp3$Condition,tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y )
+tmp3$Perc=tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y
+plotmeans(Perc ~interaction(Condition,Trial),data=tmp3)
+wilcox_test( Perc ~ Condition,distribution="exact",data=subset(tmp3,Trial==1))
+wilcox_test( Perc ~ Condition,distribution="exact",data=subset(tmp3,Trial==2))
+wilcox_test( Perc ~ Condition,distribution="exact",data=subset(tmp3,Trial==3))
+wilcox_test( Perc ~ Condition,distribution="exact",data=subset(tmp3,Trial==4))
+wilcox_test( Perc ~ Condition,distribution="exact",data=subset(tmp3,Trial==5))
+wilcox_test( Perc ~ Condition,distribution="exact",data=subset(tmp3,Trial==6))
+wilcox_test( Perc ~ Condition,distribution="exact",data=subset(tmp3,Trial==7))
 
 @
 
-Check the ranking of the AOIs
+
+Learners look a bit more at the joint, but no significant difference. No interaction significant effect.
+<<echo=FALSE>>=
+DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
+DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_Fixations=merge(DF_Fixations,DF_Learner,by=c("Participant"))
+DF_Fixations[grep("0",DF_Fixations$Learner),10]="no"
+DF_Fixations[grep("1",DF_Fixations$Learner),10]="yes"
+tmp=aggregate(Event.Duration..ms.  ~ Participant+Learner,data=DF_Fixations[grep("Joint",DF_Fixations$primary.AOI),],FUN=sum)
+tmp2=aggregate(Event.Duration..ms.  ~ Participant+Learner,data=DF_Fixations,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Learner"))
+tmp3$Perc=tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y
+plotmeans(Event.Duration..ms..x/Event.Duration..ms..y ~Learner,data=tmp3)
+wilcox.test(Event.Duration..ms..x/Event.Duration..ms..y ~Learner,data=tmp3)
+
+
+
+tmp=aggregate(Event.Duration..ms.  ~ Participant+Trial+Learner,data=DF_Fixations[grep("Joint",DF_Fixations$primary.AOI),],FUN=sum)
+tmp2=aggregate(Event.Duration..ms.  ~ Participant+Trial+Learner,data=DF_Fixations,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Learner"))
+tmp3$Perc=tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y
+plotmeans(Perc ~interaction(Learner,Trial),data=tmp3)
+
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==1))
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==2))
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==3))
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==4))
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==5))
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==6))
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==7))
+
+
+tmp=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition+Learner,data=DF_Fixations[grep("Joint",DF_Fixations$primary.AOI),],FUN=sum)
+tmp2=aggregate(Event.Duration..ms.  ~ Participant+Condition+Trial+Learner,data=DF_Fixations,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Learner","Condition"))
+tmp3$Perc=tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y
+
+with(subset(tmp3,Trial==1), {
+interaction.plot(Learner,Condition,Perc)
+})
+with(subset(tmp3,Trial==2), {
+interaction.plot(Learner,Condition,Perc)
+})
+with(subset(tmp3,Trial==3), {
+interaction.plot(Learner,Condition,Perc)
+})
+with(subset(tmp3,Trial==4), {
+interaction.plot(Learner,Condition,Perc)
+})
+with(subset(tmp3,Trial==5), {
+interaction.plot(Learner,Condition,Perc)
+})
+with(subset(tmp3,Trial==6), {
+interaction.plot(Learner,Condition,Perc)
+})
+with(subset(tmp3,Trial==7), {
+interaction.plot(Learner,Condition,Perc)
+})
+
+tmp3$CombinedGroup=do.call(paste0, tmp3[c(3, 4)])
+kruskal.test( Perc ~ as.factor(CombinedGroup),data=subset(tmp3,Trial==1))
+kruskal.test( Perc ~ as.factor(CombinedGroup),data=subset(tmp3,Trial==2))
+kruskal.test( Perc ~ as.factor(CombinedGroup),data=subset(tmp3,Trial==3))
+kruskal.test( Perc ~ as.factor(CombinedGroup),data=subset(tmp3,Trial==4))
+kruskal.test( Perc ~ as.factor(CombinedGroup),data=subset(tmp3,Trial==5))
+kruskal.test( Perc ~ as.factor(CombinedGroup),data=subset(tmp3,Trial==6))
+kruskal.test( Perc ~ as.factor(CombinedGroup),data=subset(tmp3,Trial==7))
+
+
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==2))
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==3))
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==4))
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==5))
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==6))
+wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Trial==7))
+
+
+
+@
+
+HYP4:Except for trial 6, the difference in the number of dwell is non significant between conditions.
+Between learners, there is a differnce, significant for trial 2,3,4
+<<echo=FALSE>>=
+DF_Dwell=read.csv("/home//chili/Desktop/DF_Dwells",sep=",")
+DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_Dwell=merge(DF_Dwell,DF_Learner,by=c("Participant"))
+DF_Dwell[grep("0",DF_Dwell$Learner),10]="no"
+DF_Dwell[grep("1",DF_Dwell$Learner),10]="yes"
+tmp=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition+Learner,data=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],FUN=length)
+tmp2=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition+Learner,data=DF_Dwell,FUN=length)
+
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition","Learner"))
+
+plotmeans(Event.Duration..ms..y ~interaction(Condition,Trial),data=tmp3)
+plotmeans(Event.Duration..ms..y ~interaction(Learner,Trial),data=tmp3)
+
+wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==2))
+wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==3))
+wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==4))
+wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==5))
+wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==6))
+@
+
+HYP4.1:No differnece in the percentage of dwell allocated to joints, neither ibetween conditions nor betwenn learners. The average dwell time on joints is the same,but on beam is longer in tangible.(significant) 
+<<echo=FALSE>>=
+DF_Dwell=read.csv("/home//chili/Desktop/DF_Dwells",sep=",")
+DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_Dwell=merge(DF_Dwell,DF_Learner,by=c("Participant"))
+DF_Dwell[grep("0",DF_Dwell$Learner),10]="no"
+DF_Dwell[grep("1",DF_Dwell$Learner),10]="yes"
+
+
+tmp=aggregate(Event.Duration..ms.  ~ Participant+Condition+Learner,data=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],FUN=length)
+tmp2=aggregate(Event.Duration..ms.  ~ Participant+Condition+Learner,data=DF_Dwell,FUN=length)
+
+tmp3=merge(tmp,tmp2,by=c("Participant","Condition","Learner"))
+tmp3$Perc=tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y
+
+plotmeans(Perc ~Condition,data=tmp3)
+
+plotmeans(Perc ~Learner,data=tmp3)
+
+
+tmp=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition+Learner,data=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],FUN=length)
+tmp2=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition+Learner,data=DF_Dwell,FUN=length)
+
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition","Learner"))
+tmp3$Perc=tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y
+
+
+plotmeans(Perc ~interaction(Condition,Trial),data=tmp3)
+
+plotmeans(Perc ~interaction(Learner,Trial),data=tmp3)
+
+wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==2),dist="exact")
+wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==3))
+wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==4))
+wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==5))
+wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==6))
+
+******************
+
+@
+
+Hyp3-4
+<<>>=
+
+library(lme4)
+tmp=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),]
+
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==1)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==2)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+
+summary(model)
+summary(model2)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==3)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==4)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==5)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==6)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==7)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+
+
+tmp=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),]
+
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==1)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==2)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==3)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==4)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==5)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==6)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==7)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+**************learners******
+  
+library(lme4)
+tmp=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),]
+
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==1)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==2)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+
+summary(model)
+summary(model2)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==3)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==4)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==5)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==6)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==7)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+***********Beams***********
+
+
+tmp=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),]
+
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==1)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==2)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==3)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==4)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==5)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==6)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==7)
+model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+anova(model2,model)
+
+*************leanrer beams******************
+tmp=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),]
+
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==1)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==2)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+
+summary(model)
+summary(model2)
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==3)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+summary(model)
+
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==4)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+summary(model)
+
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==5)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+summary(model)
+
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==6)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+summary(model)
+
+anova(model2,model)
+
+tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==7)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
+summary(model)
+
+anova(model2,model)
+@
+
+Let's control if tehre is any difference between the average dwell time on joints and on beams in each condition. In tangible, the avg is significatly lower on joints, while it's more on beams  
+
+<<>>=
+tmp=DF_Dwell
+tmp$JointType=0
+tmp[grep("Joint",DF_Dwell$primary.AOI,invert = T),11]="beam"
+tmp[grep("Joint",DF_Dwell$primary.AOI,invert = F),11]="joint"
+
+model<-lmer(Event.Duration..ms.~JointType+(1|Participant)+(1|Trial), data = subset(tmp,Condition=="static"),REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = subset(tmp,Condition=="static"),REML=FALSE)
+summary(model)
+anova(model2,model)
+
+model<-lmer(Event.Duration..ms.~JointType+(1|Participant)+(1|Trial), data = subset(tmp,Condition=="tangible"),REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = subset(tmp,Condition=="tangible"),REML=FALSE)
+summary(model)
+anova(model2,model)
+
+model<-lmer(Event.Duration..ms.~JointType+(1|Participant)+(1|Trial), data = subset(tmp,Condition=="static" & Learner=="yes"),REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = subset(tmp,Condition=="static"& Learner=="yes"),REML=FALSE)
+summary(model)
+anova(model2,model)
+
+model<-lmer(Event.Duration..ms.~JointType+(1|Participant)+(1|Trial), data = subset(tmp,Condition=="static" & Learner=="no"),REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = subset(tmp,Condition=="static"& Learner=="no"),REML=FALSE)
+summary(model)
+anova(model2,model)
+
+model<-lmer(Event.Duration..ms.~JointType+(1|Participant)+(1|Trial), data = subset(tmp,Condition=="tangible" & Learner=="yes"),REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = subset(tmp,Condition=="tangible"& Learner=="yes"),REML=FALSE)
+summary(model)
+anova(model2,model)
+
+model<-lmer(Event.Duration..ms.~JointType+(1|Participant)+(1|Trial), data = subset(tmp,Condition=="tangible" & Learner=="no"),REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = subset(tmp,Condition=="tangible"& Learner=="no"),REML=FALSE)
+summary(model)
+anova(model2,model)
+
+
+model<-lmer(Event.Duration..ms.~JointType+(1|Participant)+(1|Trial), data = subset(tmp, Learner=="no"),REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = subset(tmp, Learner=="no"),REML=FALSE)
+summary(model)
+anova(model2,model)
+
+
+
+model<-lmer(Event.Duration..ms.~JointType+(1|Participant)+(1|Trial), data = subset(tmp, Learner=="yes"),REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = subset(tmp, Learner=="yes"),REML=FALSE)
+summary(model)
+anova(model2,model)
+
+
+model<-lmer(Event.Duration..ms.~JointType+Condition+(1|Participant)+(1|Trial), data = subset(tmp, Learner=="no"),REML=FALSE)
+model2<-lmer(Event.Duration..ms.~Condition+(1|Participant)+(1|Trial), data = subset(tmp, Learner=="no"),REML=FALSE)
+summary(model)
+anova(model2,model)
+
+model<-lmer(Event.Duration..ms.~JointType+Condition+(1|Participant)+(1|Trial), data = subset(tmp, Learner=="yes"),REML=FALSE)
+model2<-lmer(Event.Duration..ms.~Condition+(1|Participant)+(1|Trial), data = subset(tmp, Learner=="yes"),REML=FALSE)
+summary(model)
+anova(model2,model)
+
+
+model<-lmer(Event.Duration..ms.~JointType+Condition:Learner+(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+model2<-lmer(Event.Duration..ms.~JointType+(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+@
+
+HYP5:No differences in the number of AOI vistited between condition.(avg 16), nor between learners
 <<>>=
 DF_Dwells_Rank=read.csv("Desktop/DF_Dwells_Rank",sep = ",")
-plotmeans(Rank~Condition,data=subset(DF_Dwells_Rank,Trial==4 & AOI=="JointD"))
-wilcox.test(Rank~Condition,data=subset(DF_Dwells_Rank,Trial==2 & AOI=="JointD"));
-@
-<<>>=
+DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_Dwells_Rank=merge(DF_Dwells_Rank,DF_Learner,by=c("Participant"))
+DF_Dwells_Rank[grep("0",DF_Dwells_Rank$Learner),7]="no"
+DF_Dwells_Rank[grep("1",DF_Dwells_Rank$Learner),7]="yes"
+
+tmp=aggregate(AOI ~ Participant+Trial+Condition+Learner,data=DF_Dwells_Rank,FUN=length)
+
+plotmeans(AOI~interaction(Condition,Trial),data=tmp)
+
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==1))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==2))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==3))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==4))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==5))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==6))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==7))
+
+
+plotmeans(AOI~interaction(Learner,Trial),data=tmp)
+
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==1))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==2))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==3))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==4))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==5))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==6))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==7))
+
+*****************10s
+
 DF_Dwells_Rank_10sec=read.csv("Desktop/DF_Dwells_Rank_10sec",sep = ",")
-plotmeans(Rank~interaction(Condition,AOI),data=subset(DF_Dwells_Rank_10sec,Trial==4))
-wilcox.test(Rank~Condition,data=subset(DF_Dwells_Rank,Trial==2 & AOI=="JointD"));
+DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_Dwells_Rank_10sec=merge(DF_Dwells_Rank_10sec,DF_Learner,by=c("Participant"))
+DF_Dwells_Rank_10sec[grep("0",DF_Dwells_Rank_10sec$Learner),7]="no"
+DF_Dwells_Rank_10sec[grep("1",DF_Dwells_Rank_10sec$Learner),7]="yes"
+
+tmp=aggregate(AOI ~ Participant+Trial+Condition+Learner,data=DF_Dwells_Rank_10sec,FUN=length)
+
+plotmeans(AOI~interaction(Condition,Trial),data=tmp)
+
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==1))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==2))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==3))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==4))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==5))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==6))
+wilcox.test(AOI~Condition,data=subset(tmp,Trial==7))
+
+
+plotmeans(AOI~interaction(Learner,Trial),data=tmp)
+
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==1))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==2))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==3))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==4))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==5))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==6))
+wilcox.test(AOI~Learner,data=subset(tmp,Trial==7))
+
 @
 
-it seems that there are some differences in the way number of AOI the explore during the experiment. In tangible condition, it is slightly lower.
+
+HYP6:Check the ranking of the AOIs. they are pretty omogeneous until the structures with two forces. Then, something changes in the order of visiting. Expecially, for the last joints.
 <<>>=
-tmp=aggregate(AOI ~ Participant+Trial+Condition,data=DF_Dwells_Rank,FUN=length)
-plotmeans(AOI~interaction(Condition,Trial),data=tmp)
-tmp2=subset(tmp,Trial==3)
-
-chisq.test(tmp2$AOI,tmp2$Condition)
-fisher.test(tmp2$AOI,tmp2$Condition)
-
-prop.test(x=c(128,170), n=c(428,682),alternative="two.sided", conf.level=.99)
-
-tmp=aggregate(AOI ~ Participant+Trial+Condition,data=DF_Dwells_Rank[grep("Joint",DF_Dwells_Rank$AOI,invert = FALSE),],FUN=length)
-plotmeans(AOI~interaction(Condition,Trial),data=tmp)
-
-tmp=aggregate(AOI ~ Participant+Trial+Condition,data=DF_Dwells_Rank_10sec,FUN=length)
-plotmeans(AOI~interaction(Condition,Trial),data=tmp)
-
-
-
-@
-
-
-
-
-In this chunck, the proportion of dwells on each beam is plotted. The distribution of dwells seems to be similar between the groups
-<<>>=
-
-tmp=aggregate (Event.Duration..ms. ~ primary.AOI+Participant+Trial+Condition,data=DF_Dwell,FUN=length)
-tmp2=aggregate(Event.Duration..ms. ~ Participant+Trial+Condition,data=DF_Dwell,FUN=length)
-
-tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
-
-tmp4=subset(tmp3,Trial==1)
 
 par(las=2)
-plotmeans(tmp4$Event.Duration..ms..x/tmp4$Event.Duration..ms..y~ interaction(tmp4$Condition,tmp4$primary.AOI))
+DF_Dwells_Rank=read.csv("Desktop/DF_Dwells_Rank",sep = ",")
+AOI_table=read.csv("Desktop/AOI_table.csv",sep=",")
+I need that all the partcipant are there
+AOI_table=merge(DF_Duration,AOI_table,by=c("Trial"))
+DF_Dwells_Rank=merge(DF_Dwells_Rank, AOI_table,by=c("Trial","AOI","Participant","Condition"),all=T)
+DF_Dwells_Rank=subset(DF_Dwells_Rank, !is.na(Distance))
+DF_Dwells_Rank[is.na(DF_Dwells_Rank)] = 100
+
+
+cor(DF_Dwells_Rank$Distance,DF_Dwells_Rank$Rank,method = "spearman")
+cor.test(DF_Dwells_Rank$Distance,DF_Dwells_Rank$Rank,method = "spearman")
+
+tmp=subset(DF_Dwells_Rank,Trial==1 )
+cor(tmp$Distance,tmp$Rank,method = "spearman")
+cor.test(tmp$Distance,tmp$Rank,method = "spearman")
+
+data=droplevels(subset(DF_Dwells_Rank,Trial==1 & Condition=="static"))
+matrix=t(acast(data, Participant~AOI, value.var="Rank"))
+matrix[is.na(matrix)] = 100
+kendall(matrix, correct = TRUE)
+
+pctable <- data.frame(expand.grid(rank=levels(as.factor(data$Rank)),AOI=levels(droplevels(data$AOI))), value=1,median=0,distance=0)
+for (i in 1:nrow(pctable)){
+  pctable[i,3]=nrow(subset(data, AOI==pctable[i,2] & Rank==pctable[i,1]))
+  pctable[i,4]=median(subset(data, AOI==pctable[i,2])$Rank)
+  pctable[i,5]=median(subset(data, AOI==pctable[i,2])$Distance)
+}
+pctable=pctable[order(pctable$distance),]
+AOI_table=read.csv("Desktop/AOI_table.csv",sep=",")
+tmp=subset(AOI_table,Trial=="1")
+tmp=tmp[order(tmp$Distance),]
+pctable$AOI=factor(pctable$AOI, levels = tmp$AOI)
+
+bubble.size <- sqrt((pctable$value / max(pctable$value)) / pi)
+
+symbols(pctable$AOI,pctable$rank,circles=bubble.size,inches=.2, fg="black", bg="blue",yaxt="n", xaxt="n", xlab="AOI", ylab="Visit Order")
+symbols(pctable$AOI, pctable$median, circles=bubble.size,inches=.2, fg="red", bg="red",yaxt="n", xaxt="n", xlab="AOI", ylab="Visit Order", add=T)
+
+axis(1, at=1:length(levels(droplevels(pctable$AOI))), labels=levels(droplevels(pctable$AOI))) 
+axis(2, at=1:length(levels(as.factor(pctable$rank))),labels=levels(as.factor(pctable$rank)), cex.axis=0.7) 
+
+
+
+data=subset(DF_Dwells_Rank,Trial==2)
+data=droplevels(data)
+matrix=t(acast(data, Participant~AOI, value.var="Rank"))
+kendall(matrix, correct = TRUE)
+
+pctable <- data.frame(expand.grid(rank=levels(as.factor(data$Rank)),AOI=levels(droplevels(data$AOI))), value=1)
+for (i in 1:nrow(pctable)){
+  pctable[i,3]=nrow(subset(data, AOI==pctable[i,2] & Rank==pctable[i,1]))
+}
+bubble.size <- sqrt((pctable$value / max(pctable$value)) / pi)
+
+symbols(pctable$AOI, pctable$rank, circles=bubble.size,inches=.2, fg="black", bg="blue",yaxt="n", xaxt="n", xlab="AOI", ylab="Rank")
+
+axis(1, at=1:length(levels(droplevels(data$AOI))), labels=levels(droplevels(data$AOI))) 
+axis(2, at=1:length(levels(as.factor(data$Rank))),labels=levels(as.factor(data$Rank)), cex.axis=0.7) 
+
+
+
+data=subset(DF_Dwells_Rank,Trial==3)
+matrix=t(acast(data, Participant~AOI, value.var="Rank"))
+kendall(matrix, correct = TRUE)
+
+data=subset(DF_Dwells_Rank,Trial==4)
+matrix=t(acast(data, Participant~AOI, value.var="Rank"))
+kendall(matrix, correct = TRUE)
+
+data=subset(DF_Dwells_Rank,Trial==5)
+matrix=t(acast(data, Participant~AOI, value.var="Rank"))
+kendall(matrix, correct = TRUE)
+
+data=subset(DF_Dwells_Rank,Trial==6)
+matrix=t(acast(data, Participant~AOI, value.var="Rank"))
+kendall(matrix, correct = TRUE)
+
+data=subset(DF_Dwells_Rank,Trial==7)
+matrix=t(acast(data, Participant~AOI, value.var="Rank"))
+kendall(matrix, correct = TRUE)
+
+
+
+tmp=aggregate(Rank ~AOI,data=subset(DF_Dwells_Rank,Trial==1),FUN=sum)
+m=length(levels(as.factor(subset(DF_Dwells_Rank,Trial==1)$Participant)))
+n=length(levels(droplevels(tmp$AOI)))
+K_prime=0.5*m*(n+1)
+tmp$S=(tmp$Rank-K_prime)^2
+S=sum(tmp$S)
+W=12*S/( m^2+(n^3-n) )
+
+
+plotmeans(Rank~interaction(Condition,AOI),data=subset(DF_Dwells_Rank[grep("Joint",DF_Dwells_Rank$AOI, invert = FALSE),],Trial==6))
 @
+
+
+Hyp 8:The revisit dwell is pretty much the same. The length 1 is the more frequent.
+<<>>=
+library("plyr")
+DF_RevisitJoint=read.csv("Desktop/DF_Dwells_Revisit_Joints",sep=",")
+DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_RevisitJoint=merge(DF_RevisitJoint,DF_Learner,by=c("Participant"))
+
+DF_RevisitJoint[grep("0",DF_RevisitJoint$Learner),7]="no"
+DF_RevisitJoint[grep("1",DF_RevisitJoint$Learner),7]="yes"
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Condition","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Condition,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+plotmeans(freq.x/freq.y~interaction(Condition,Length),data=subset(tmp3,Trial==1))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Condition","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Condition,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+plotmeans(freq.x/freq.y~interaction(Condition,Length),data=subset(tmp3,Trial==2))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Condition","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Condition,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+plotmeans(freq.x/freq.y~interaction(Condition,Length),data=subset(tmp3,Trial==3))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Condition","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Condition,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+plotmeans(freq.x/freq.y~interaction(Condition,Length),data=subset(tmp3,Trial==4))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Condition","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Condition,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+plotmeans(freq.x/freq.y~interaction(Condition,Length),data=subset(tmp3,Trial==5))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Condition","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Condition,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+plotmeans(freq.x/freq.y~interaction(Condition,Length),data=subset(tmp3,Trial==6))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Condition","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Condition,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+plotmeans(freq.x/freq.y~interaction(Condition,Length),data=subset(tmp3,Trial==7))
+
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Learner","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Learner,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Learner"))
+plotmeans(freq.x/freq.y~interaction(Learner,Length),data=subset(tmp3,Trial==1))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Learner","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Learner,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Learner"))
+plotmeans(freq.x/freq.y~interaction(Learner,Length),data=subset(tmp3,Trial==2))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Learner","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Learner,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Learner"))
+plotmeans(freq.x/freq.y~interaction(Learner,Length),data=subset(tmp3,Trial==3))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Learner","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Learner,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Learner"))
+plotmeans(freq.x/freq.y~interaction(Learner,Length),data=subset(tmp3,Trial==4))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Learner","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Learner,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Learner"))
+plotmeans(freq.x/freq.y~interaction(Learner,Length),data=subset(tmp3,Trial==5))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Learner","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Learner,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Learner"))
+plotmeans(freq.x/freq.y~interaction(Learner,Length),data=subset(tmp3,Trial==6))
+
+tmp=count(DF_RevisitJoint, c("Participant","Trial","Learner","Length"))
+tmp2=aggregate(freq ~ Participant+Trial+Learner,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Learner"))
+plotmeans(freq.x/freq.y~interaction(Learner,Length),data=subset(tmp3,Trial==7))
+
+
+tmp=count(DF_RevisitJoint, c("Participant","Length"))
+tmp2=aggregate(freq ~ Participant,data=tmp,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant"))
+plotmeans(freq.x/freq.y~Length,data=tmp3)
+
+
+
+@
+
+
+Hyp 8: No difference in the number of entry to joints in the task
+<<>>=
+DF_Entry=read.csv("Desktop/DF_Joints_Entries",sep=",")
+DF_Dwell=read.csv("Desktop/DF_Dwells",sep=",")
+tmp=aggregate(Entries~Participant+Trial+Condition,data=DF_Entry,FUN=sum)
+tmp2=aggregate(Event.Duration..ms.~Participant+Trial+Condition,data=DF_Dwell,FUN=length)
+tmp=merge(tmp,tmp2,by=c("Participant","Condition","Trial"))
+tmp3=merge(tmp,DF_Learner,by=c("Participant"))
+tmp3[grep("0",tmp3$Learner),7]="no"
+tmp3[grep("1",tmp3$Learner),7]="yes"
+
+plotmeans(Entries/Event.Duration..ms.~interaction(Condition,Trial),data=tmp3)
+
+plotmeans(Entries/Event.Duration..ms.~interaction(Learner,Trial),data=tmp3)
+
+wilcox.test(Entries~Learner,data=subset(tmp3,Trial=="1"))
+wilcox.test(Entries~Learner,data=subset(tmp3,Trial=="2"))
+wilcox.test(Entries~Learner,data=subset(tmp3,Trial=="3"))
+wilcox.test(Entries~Learner,data=subset(tmp3,Trial=="4"))
+wilcox.test(Entries~Learner,data=subset(tmp3,Trial=="5"))
+wilcox.test(Entries~Learner,data=subset(tmp3,Trial=="6"))
+wilcox.test(Entries~Learner,data=subset(tmp3,Trial=="7"))
+
+
+@
+
+
+
+
+Triangle analysis
+<<>>=
+DF_Triangles=read.csv("Desktop/DF_Triangles_Collapse",sep=",")
+DF_Learner=read.csv("Desktop//Learners.csv",sep=",")
+DF_Triangles=merge(DF_Triangles,DF_Learner,by=c("Participant"))
+
+DF_Dwell=read.csv("Desktop/DF_Dwells",sep=",")
+tmp=aggregate(Triangle ~ Participant+Trial+Condition+Learner,data=DF_Triangles,FUN=length)
+tmp2=aggregate(Event.Duration..ms. ~ Participant+Trial+Condition,data=DF_Dwell,FUN=length)
+tmp3=merge(tmp2,tmp,by=c("Participant","Trial","Condition"),all.x=TRUE)
+tmp3[is.na(tmp3)] <- 0
+
+tmp3[grep("0",tmp3$Learner),5]="no"
+tmp3[grep("1",tmp3$Learner),5]="yes"
+
+plotmeans(Triangle/Event.Duration..ms.~interaction(Condition,Trial), data=tmp3)
+plotmeans(Triangle/Event.Duration..ms.~interaction(Learner,Trial), data=tmp3)
+
+wilcox.test(Triangle/Event.Duration..ms.~Learner,data=subset(tmp3,Trial=="1"))
+wilcox.test(Triangle/Event.Duration..ms.~Learner,data=subset(tmp3,Trial=="2"))
+wilcox.test(Triangle/Event.Duration..ms.~Learner,data=subset(tmp3,Trial=="3"))
+wilcox.test(Triangle/Event.Duration..ms.~Learner,data=subset(tmp3,Trial=="4"))
+wilcox.test(Triangle/Event.Duration..ms.~Learner,data=subset(tmp3,Trial=="5"))
+wilcox.test(Triangle/Event.Duration..ms.~Learner,data=subset(tmp3,Trial=="6"))
+wilcox.test(Triangle/Event.Duration..ms.~Learner,data=subset(tmp3,Trial=="7"))
+
+
+library(lme4)
+
+plotmeans(Duration~interaction(Condition,Trial),data=DF_Triangles)
+plotmeans(Duration~interaction(Learner,Trial),data=DF_Triangles)
+
+model<-lmer(Duration~Condition+(1|Participant)+(1|Trial), data = DF_Triangles,REML=FALSE)
+model2<-lmer(Duration~(1|Participant)+(1|Trial), data = DF_Triangles,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+model<-lmer(Duration~Learner+(1|Participant)+(1|Trial), data = DF_Triangles,REML=FALSE)
+model2<-lmer(Duration~(1|Participant)+(1|Trial), data = DF_Triangles,REML=FALSE)
+summary(model)
+anova(model2,model)
+
+@
+
+
+<<>>=
+DF_Dwell=read.csv("Desktop/DF_Dwells",sep=",")
+DF_Learner=read.csv("Desktop//Learners.csv",sep=",")
+DF_Dwell=merge(DF_Dwell,DF_Learner,by=c("Participant"))
+tmp=aggregate(Event.Duration..ms.~Participant+Trial+Condition+Learner,data=DF_Dwell,FUN=length)
+Saliency=aggregate(Event.Duration..ms.~Participant+Trial+Condition+Learner+primary.AOI,data=DF_Dwell,FUN=length)
+Saliency=merge(Saliency,tmp,by=c("Participant","Trial","Condition","Learner"))
+colnames(Saliency)[6] <- "Dwell"
+colnames(Saliency)[7] <- "Tot"
+Saliency$prop=Saliency$Dwell/Saliency$Tot;
+
+write.csv(Saliency,"Desktop/Saliency",row.names = FALSE)
+
+Saliency$prop=Saliency$Dwell/Saliency$Tot;
+
+Saliency_Condition=aggregate(prop~Trial+Condition+primary.AOI,data=Saliency,FUN=mean)
+
+Saliency_Condition=Saliency_Condition[order(Saliency_Condition$Trial,Saliency_Condition$Condition ),]
+
+tmp=aggregate(prop~Trial+Condition,data=Saliency_Condition,FUN=max)
+colnames(tmp)[3] <- "max_prop"
+Saliency_Condition=merge(Saliency_Condition,tmp,by=c("Trial","Condition") )
+
+tmp=aggregate(prop~Trial+Condition,data=Saliency_Condition,FUN=sum)
+colnames(tmp)[3] <- "sum_prop"
+Saliency_Condition=merge(Saliency_Condition,tmp,by=c("Trial","Condition") )
+
+tmp=aggregate(prop~Trial+Condition,data=Saliency_Condition,FUN=min)
+colnames(tmp)[3] <- "min_prop"
+Saliency_Condition=merge(Saliency_Condition,tmp,by=c("Trial","Condition") )
+
+write.csv(Saliency_Condition,"Desktop/Saliency_Condition",row.names = FALSE)
+
+
+Saliency_Learner=aggregate(prop~Trial+Learner+primary.AOI,data=Saliency,FUN=mean)
+
+Saliency_Learner=Saliency_Learner[order(Saliency_Learner$Trial,Saliency_Learner$Learner ),]
+
+tmp=aggregate(prop~Trial+Learner,data=Saliency_Learner,FUN=max)
+colnames(tmp)[3] <- "max_prop"
+Saliency_Learner=merge(Saliency_Learner,tmp,by=c("Trial","Learner") )
+
+tmp=aggregate(prop~Trial+Learner,data=Saliency_Learner,FUN=sum)
+colnames(tmp)[3] <- "sum_prop"
+Saliency_Learner=merge(Saliency_Learner,tmp,by=c("Trial","Learner") )
+
+tmp=aggregate(prop~Trial+Learner,data=Saliency_Learner,FUN=min)
+colnames(tmp)[3] <- "min_prop"
+Saliency_Learner=merge(Saliency_Learner,tmp,by=c("Trial","Learner") )
+
+Saliency_Learner[grep("0",Saliency_Learner$Learner),2]="no"
+Saliency_Learner[grep("1",Saliency_Learner$Learner),2]="yes"
+
+write.csv(Saliency_Learner,"Desktop/Saliency_Learner",row.names = FALSE)
+
+
+
+@
+
+
+
+
+
+
+
+
+
+
 
 
 
