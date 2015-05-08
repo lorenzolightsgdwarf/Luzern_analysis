@@ -19,8 +19,6 @@ In task 3,5,6(0.056),7,8 tehre is a significant difference between the condition
 <<>>=
 DF_Duration=read.csv("Desktop/DF_Duration", sep=",")
 
-
-
 tmp=aggregate(Duration~Condition+Participant,data=DF_Duration,FUN=sum)
 hist(tmp$Duration)
 plotmeans(tmp$Duration~tmp$Condition)
@@ -287,7 +285,7 @@ wilcox.test(Event.Duration..ms./Duration~Learner, data=subset(tmp,Trial==7))
 
 HYP3:It seems that in tngible they allocate less percent of fixation time to the joints. Summing up all the trial, the significance is 0.004 (r=0.56). Significant for most of the trials.
 <<echo=FALSE>>=
-DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
+DF_Fixations=read.csv("/home//chili/Desktop/Luzern_Analysis/DF_Fixations",sep=",")
 tmp=aggregate(Event.Duration..ms.  ~ Participant+Condition,data=DF_Fixations[grep("Joint",DF_Fixations$primary.AOI),],FUN=sum)
 tmp2=aggregate(Event.Duration..ms.  ~ Participant+Condition,data=DF_Fixations,FUN=sum)
 tmp3=merge(tmp,tmp2,by=c("Participant","Condition"))
@@ -317,8 +315,8 @@ wilcox_test( Perc ~ Condition,distribution="exact",data=subset(tmp3,Trial==7))
 
 Learners look a bit more at the joint, but no significant difference. No interaction significant effect.
 <<echo=FALSE>>=
-DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
-DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_Fixations=read.csv("/home//chili/Desktop/Luzern_Analysis/DF_Fixations",sep=",")
+DF_Learner=read.csv("Desktop/Luzern_Analysis/Learners.csv",sep=",")
 DF_Fixations=merge(DF_Fixations,DF_Learner,by=c("Participant"))
 DF_Fixations[grep("0",DF_Fixations$Learner),10]="no"
 DF_Fixations[grep("1",DF_Fixations$Learner),10]="yes"
@@ -328,7 +326,6 @@ tmp3=merge(tmp,tmp2,by=c("Participant","Learner"))
 tmp3$Perc=tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y
 plotmeans(Event.Duration..ms..x/Event.Duration..ms..y ~Learner,data=tmp3)
 wilcox.test(Event.Duration..ms..x/Event.Duration..ms..y ~Learner,data=tmp3)
-
 
 
 tmp=aggregate(Event.Duration..ms.  ~ Participant+Trial+Learner,data=DF_Fixations[grep("Joint",DF_Fixations$primary.AOI),],FUN=sum)
@@ -419,9 +416,11 @@ wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==6)
 
 HYP4.1:No differnece in the percentage of dwell allocated to joints, neither ibetween conditions nor betwenn learners. The average dwell time on joints is the same,but on beam is longer in tangible.(significant) 
 <<echo=FALSE>>=
-DF_Dwell=read.csv("/home//chili/Desktop/DF_Dwells",sep=",")
-DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_Dwell=read.csv("/home//chili/Desktop/Luzern_Analysis/DF_Dwells",sep=",")
+DF_Learner=read.csv("Desktop/Luzern_Analysis/Learners.csv",sep=",")
 DF_Dwell=merge(DF_Dwell,DF_Learner,by=c("Participant"))
+
+DF_Dwell[grep("-1",DF_Dwell$Learner),10]="no"
 DF_Dwell[grep("0",DF_Dwell$Learner),10]="no"
 DF_Dwell[grep("1",DF_Dwell$Learner),10]="yes"
 
@@ -569,7 +568,7 @@ model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==2)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 
 summary(model)
@@ -577,27 +576,27 @@ summary(model2)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==3)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==4)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==5)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==6)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),],Trial==7)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 anova(model2,model)
 
@@ -606,31 +605,31 @@ anova(model2,model)
 
 tmp=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),]
 
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
 summary(model)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==1)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 summary(model)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==2)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 summary(model)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==3)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 summary(model)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==4)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 summary(model)
 anova(model2,model)
@@ -642,12 +641,12 @@ summary(model)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==6)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 anova(model2,model)
 
 tmp=subset(DF_Dwell[grep("Joint",DF_Dwell$primary.AOI,invert = T),],Trial==7)
-model<-lmer(Event.Duration..ms.~Condition+(1|Participant), data = tmp,REML=FALSE)
+model<-lmer(Event.Duration..ms.~Learner+(1|Participant), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant), data = tmp,REML=FALSE)
 anova(model2,model)
 
@@ -779,6 +778,23 @@ anova(model2,model)
 
 @
 
+<<>>=
+tmp=DF_Dwell
+tmp$JointType=0
+tmp[grep("Joint",DF_Dwell$primary.AOI,invert = T),11]="beam"
+tmp[grep("Joint",DF_Dwell$primary.AOI,invert = F),11]="joint"
+
+
+model<-lmer(Event.Duration..ms.~JointType+(1|Participant)+(1|Trial), data = subset(tmp,Condition=="static"),REML=FALSE)
+model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = subset(tmp,Condition=="static"),REML=FALSE)
+summary(model)
+anova(model2,model)
+
+@
+
+
+
+
 HYP5:No differences in the number of AOI vistited between condition.(avg 16), nor between learners
 <<>>=
 DF_Dwells_Rank=read.csv("Desktop/DF_Dwells_Rank",sep = ",")
@@ -843,15 +859,16 @@ wilcox.test(AOI~Learner,data=subset(tmp,Trial==7))
 
 @
 
-
 HYP6:Check the ranking of the AOIs. they are pretty omogeneous until the structures with two forces. Then, something changes in the order of visiting. Expecially, for the last joints.
 <<>>=
-
 par(las=2)
 DF_Dwells_Rank=read.csv("Desktop/DF_Dwells_Rank",sep = ",")
 AOI_table=read.csv("Desktop/AOI_table.csv",sep=",")
+
 I need that all the partcipant are there
+
 AOI_table=merge(DF_Duration,AOI_table,by=c("Trial"))
+
 DF_Dwells_Rank=merge(DF_Dwells_Rank, AOI_table,by=c("Trial","AOI","Participant","Condition"),all=T)
 DF_Dwells_Rank=subset(DF_Dwells_Rank, !is.na(Distance))
 DF_Dwells_Rank[is.na(DF_Dwells_Rank)] = 100
@@ -947,8 +964,8 @@ plotmeans(Rank~interaction(Condition,AOI),data=subset(DF_Dwells_Rank[grep("Joint
 Hyp 8:The revisit dwell is pretty much the same. The length 1 is the more frequent.
 <<>>=
 library("plyr")
-DF_RevisitJoint=read.csv("Desktop/DF_Dwells_Revisit_Joints",sep=",")
-DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_RevisitJoint=read.csv("Desktop/Luzern_Analysis/DF_Dwells_Revisit_Joints",sep=",")
+DF_Learner=read.csv("Desktop/Luzern_Analysis/Learners.csv",sep=",")
 DF_RevisitJoint=merge(DF_RevisitJoint,DF_Learner,by=c("Participant"))
 
 DF_RevisitJoint[grep("0",DF_RevisitJoint$Learner),7]="no"
@@ -1038,12 +1055,13 @@ plotmeans(freq.x/freq.y~Length,data=tmp3)
 
 Hyp 8: No difference in the number of entry to joints in the task
 <<>>=
-DF_Entry=read.csv("Desktop/DF_Joints_Entries",sep=",")
-DF_Dwell=read.csv("Desktop/DF_Dwells",sep=",")
+DF_Entry=read.csv("Desktop/Luzern_Analysis/DF_Joints_Entries",sep=",")
+DF_Dwell=read.csv("Desktop/Luzern_Analysis/DF_Dwells",sep=",")
 tmp=aggregate(Entries~Participant+Trial+Condition,data=DF_Entry,FUN=sum)
 tmp2=aggregate(Event.Duration..ms.~Participant+Trial+Condition,data=DF_Dwell,FUN=length)
 tmp=merge(tmp,tmp2,by=c("Participant","Condition","Trial"))
 tmp3=merge(tmp,DF_Learner,by=c("Participant"))
+tmp3[grep("-1",tmp3$Learner),7]="no"
 tmp3[grep("0",tmp3$Learner),7]="no"
 tmp3[grep("1",tmp3$Learner),7]="yes"
 
@@ -1061,8 +1079,6 @@ wilcox.test(Entries~Learner,data=subset(tmp3,Trial=="7"))
 
 
 @
-
-
 
 
 Triangle analysis

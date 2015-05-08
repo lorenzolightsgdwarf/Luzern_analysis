@@ -1,0 +1,109 @@
+\documentclass{article}
+
+\begin{document}
+\SweaveOpts{concordance=TRUE}
+
+Kmean test
+<<>>=
+
+library(reshape)
+AOI_table=read.csv("Desktop/Luzern_Analysis/AOI_table.csv",sep=",")
+
+
+DF_Duration=read.csv("Desktop/Luzern_Analysis/DF_Duration", sep=",")
+DF_Duration=subset(DF_Duration,Trial>3)
+
+dataframe=cast(DF_Duration[c(-2)], Participant~Trial) 
+
+#mydata=na.omit(dataframe[c(-1,-2)])
+
+DF_Fixations=read.csv("/home//chili/Desktop/Luzern_Analysis/DF_Fixations",sep=",")
+DF_Fixations=subset(DF_Fixations,Trial>4)
+DF_Fixations=subset(DF_Fixations,Event.End..ms.<30000)
+tmp=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Fixations[grep("Joint",DF_Fixations$primary.AOI),],FUN=sum)
+tmp2=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Fixations,FUN=sum)
+tmp3=merge(tmp,tmp2,by=c("Participant","Trial","Condition"))
+plotmeans(Event.Duration..ms..x/Event.Duration..ms..y ~interaction(Condition,Trial),data=tmp3)
+tmp3$Perc=tmp3$Event.Duration..ms..x/tmp3$Event.Duration..ms..y
+tmp3=tmp3[c(-3,-4,-5)]
+
+dataframe=merge(dataframe,cast(tmp3, Participant~Trial),by="Participant") 
+dataframe=dataframe[c(-1)]
+
+mydata <- scale(dataframe)
+fit <- pam(mydata, 2) # 5 cluster solution
+clusplot(mydata, fit$cluster, color=TRUE, shade=TRUE,labels=2, lines=0)
+
+
+-----Saliency----
+DF_Dwell=read.csv("Desktop/Luzern_Analysis/DF_Dwells",sep=",")
+colnames(DF_Dwell)[7]="AOI"
+DF_Dwell=subset(DF_Dwell,Event.End..ms.<20000)
+tmp=aggregate(Event.Duration..ms.~Participant+Trial+Condition,data=DF_Dwell,FUN=length)
+Saliency=aggregate(Event.Duration..ms.~Participant+Trial+Condition+AOI,data=DF_Dwell,FUN=length)
+Saliency=merge(Saliency,tmp,by=c("Participant","Trial","Condition"))
+colnames(Saliency)[5] <- "Dwell"
+colnames(Saliency)[6] <- "Tot"
+Saliency$prop=Saliency$Dwell/Saliency$Tot;
+Saliency=Saliency[c(-3,-5,-6)]
+Saliency=Saliency[ order(Saliency[,1],Saliency[,2], Saliency[,3]), ]
+Saliency=merge(Saliency, AOI_table,by=c("Trial","AOI"),all=T)
+Saliency=subset(Saliency,Trial>4)
+
+Saliency=Saliency[ order(Saliency[,3],Saliency[,1], Saliency[,2]), ]
+
+Saliency=within(Saliency, Variable <- paste(Trial, AOI, sep='_'))
+
+Saliency=Saliency[c(-1,-2,-5,-6)]
+
+dataframe=cast(Saliency, Participant~Variable,value="prop")
+dataframe=dataframe[c(-1)]
+
+dataframe[is.na(dataframe)] = 0
+
+dataframe[dataframe>0]=1
+
+library(skmeans)
+mydata <- as.matrix(dataframe)
+fit <- skmeans(mydata, 2) # 5 cluster solution
+clusplot(mydata, fit$cluster, color=TRUE, shade=TRUE,labels=2, lines=0)
+
+
+Non funziona....prova con i primi 30 secondi
+
+
+--------Copertura----
+
+DF_Dwells_Rank=read.csv("Desktop/Luzern_Analysis/DF_Dwells_Rank",sep = ",")
+DF_Learner=read.csv("Desktop/Luzern_Analysis/Learners.csv",sep=",")
+DF_Dwells_Rank=merge(DF_Dwells_Rank,DF_Learner,by=c("Participant"))
+
+DF_Dwells_Rank=subset(DF_Dwells_Rank,Entry_Timestamp<30000)
+tmp=aggregate(Entry_Timestamp~Participant+Trial+Condition+Learner,data=DF_Dwells_Rank,FUN=length)
+plotmeans(tmp$Entry_Timestamp~interaction(tmp$Learner,tmp$Trial))
+
+dataframe=cast(tmp[c(-3,-4)], Participant~Trial)
+
+mydata <- scale(dataframe)
+fit <- pam(mydata, 2) # 5 cluster solution
+clusplot(mydata, fit$cluster, color=TRUE, shade=TRUE,labels=2, lines=0)
+
+library(mclust)
+
+f=function(x){
+   x<-as.numeric(as.character(x)) #first convert each column into numeric if it is from factor
+   x[is.na(x)]=median(x, na.rm=TRUE) #convert the item with NA to median value from the column
+   x #display the column
+}
+dataframe=data.frame(apply(dataframe,2,f))
+
+fit <- Mclust(mydata)
+
+
+plot(fit, what = "classification")
+
+@
+
+
+
+\end{document}

@@ -1,0 +1,22 @@
+\documentclass{article}
+
+\usepackage{Sweave}
+\begin{document}
+\input{Analysis-concordance}
+
+****************************Elimitae non valid AOI************* 
+DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
+AOI_table=read.csv("Desktop/AOI_table.csv",sep=",")
+colnames(DF_Fixations)[7]="AOI"
+DF_Fixations=merge(DF_Fixations, AOI_table,by=c("Trial","AOI"),all=T)
+data=subset(DF_Fixations,is.na(DF_Fixations$Distance))
+
+
+
+HYP1:Checking the duration: the durations are usually non-normally distributed.
+The whole experiment singnificantly took less in tangible condition.
+In task 3,5,6(0.056),7,8 tehre is a significant difference between the conditions. Probably it is an effect of the manipulation temptetion, or game temptation in  this contex.
+
+\begin{Schunk}
+\begin{Sinput}
+> DF_Duration=read.csv("Desktop/DF_Duration", sep=",")
