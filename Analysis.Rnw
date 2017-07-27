@@ -4,8 +4,8 @@
 \SweaveOpts{concordance=TRUE}
 
 ****************************Elimitae non valid AOI************* 
-DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
-AOI_table=read.csv("Desktop/AOI_table.csv",sep=",")
+DF_Fixations=read.csv("DF_Fixations",sep=",") 
+AOI_table=read.csv("AOI_table.csv",sep=",")
 colnames(DF_Fixations)[7]="AOI"
 DF_Fixations=merge(DF_Fixations, AOI_table,by=c("Trial","AOI"),all=T)
 data=subset(DF_Fixations,is.na(DF_Fixations$Distance))
@@ -17,7 +17,7 @@ The whole experiment singnificantly took less in tangible condition.
 In task 3,5,6(0.056),7,8 tehre is a significant difference between the conditions. Probably it is an effect of the manipulation temptetion, or game temptation in  this contex.
 
 <<>>=
-DF_Duration=read.csv("Desktop/DF_Duration", sep=",")
+DF_Duration=read.csv("DF_Duration", sep=",")
 
 tmp=aggregate(Duration~Condition+Participant,data=DF_Duration,FUN=sum)
 hist(tmp$Duration)
@@ -69,6 +69,14 @@ shapiro.test(subset(DF_Duration,Trial==8 & Condition=="tangible")$Duration)
 shapiro.test(subset(DF_Duration,Trial==8 & Condition=="static")$Duration)
 bartlett.test(Duration ~ Condition, data=subset(DF_Duration,Trial==8))
 kruskal.test(Duration~Condition, data=subset(DF_Duration,Trial==8))
+
+
+DF_Duration$Trial=as.factor(DF_Duration$Trial)
+m=lmer(data=DF_Duration,Duration/1000~Condition+(1|Trial))
+m_null=lmer(data=DF_Duration,Duration/1000~(1|Trial))
+
+anova(m,m_null,test="Chi")
+qplot(data=DF_Duration,x=Trial,y=Duration/1000, fill=Condition, geom="boxplot")
 
 @
 
@@ -137,7 +145,7 @@ wilcox.test(Duration~Learner, data=subset(DF_Duration,Trial==8))
 
 HYP2:No difference in total fixation time
 <<>>=
-DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
+DF_Fixations=read.csv("DF_Fixations",sep=",")
 tmp=aggregate(Event.Duration..ms. ~ Participant+Condition,data=DF_Fixations,FUN=sum)
 
 hist(tmp$Event.Duration..ms.)
@@ -215,8 +223,8 @@ oneway.test(Event.Duration..ms.~as.factor(Learner), data=subset(tmp,Trial==7),va
 
 HYP2.1:La percetuale di tempo su fixation ü piu alta in tangible. Nei primi 4 trial è significativa.
 <<>>=
-DF_Fixations=read.csv("/home//chili/Desktop/DF_Fixations",sep=",")
-DF_Duration=read.csv("Desktop/DF_Duration", sep=",")
+DF_Fixations=read.csv("DF_Fixations",sep=",")
+DF_Duration=read.csv("DF_Duration", sep=",")
 
 tmp=aggregate(Event.Duration..ms. ~ Participant+Condition,data=DF_Fixations,FUN=sum)
 tmp2=aggregate(Duration ~ Participant+Condition,data=DF_Duration,FUN=sum)
@@ -285,7 +293,7 @@ wilcox.test(Event.Duration..ms./Duration~Learner, data=subset(tmp,Trial==7))
 
 HYP3:It seems that in tngible they allocate less percent of fixation time to the joints. Summing up all the trial, the significance is 0.004 (r=0.56). Significant for most of the trials.
 <<echo=FALSE>>=
-DF_Fixations=read.csv("/home//chili/Desktop/Luzern_Analysis/DF_Fixations",sep=",")
+DF_Fixations=read.csv("DF_Fixations",sep=",")
 tmp=aggregate(Event.Duration..ms.  ~ Participant+Condition,data=DF_Fixations[grep("Joint",DF_Fixations$primary.AOI),],FUN=sum)
 tmp2=aggregate(Event.Duration..ms.  ~ Participant+Condition,data=DF_Fixations,FUN=sum)
 tmp3=merge(tmp,tmp2,by=c("Participant","Condition"))
@@ -394,8 +402,8 @@ wilcox_test( Perc ~ as.factor(Learner),distribution="exact",data=subset(tmp3,Tri
 HYP4:Except for trial 6, the difference in the number of dwell is non significant between conditions.
 Between learners, there is a differnce, significant for trial 2,3,4
 <<echo=FALSE>>=
-DF_Dwell=read.csv("/home//chili/Desktop/DF_Dwells",sep=",")
-DF_Learner=read.csv("Desktop/Learners.csv",sep=",")
+DF_Dwell=read.csv("DF_Dwells",sep=",")
+DF_Learner=read.csv("Learners.csv",sep=",")
 DF_Dwell=merge(DF_Dwell,DF_Learner,by=c("Participant"))
 DF_Dwell[grep("0",DF_Dwell$Learner),10]="no"
 DF_Dwell[grep("1",DF_Dwell$Learner),10]="yes"
@@ -416,8 +424,8 @@ wilcox_test(Event.Duration..ms..y~as.factor(Learner), data=subset(tmp3,Trial==6)
 
 HYP4.1:No differnece in the percentage of dwell allocated to joints, neither ibetween conditions nor betwenn learners. The average dwell time on joints is the same,but on beam is longer in tangible.(significant) 
 <<echo=FALSE>>=
-DF_Dwell=read.csv("/home//chili/Desktop/Luzern_Analysis/DF_Dwells",sep=",")
-DF_Learner=read.csv("Desktop/Luzern_Analysis/Learners.csv",sep=",")
+DF_Dwell=read.csv("DF_Dwells",sep=",")
+DF_Learner=read.csv("Learners.csv",sep=",")
 DF_Dwell=merge(DF_Dwell,DF_Learner,by=c("Participant"))
 
 DF_Dwell[grep("-1",DF_Dwell$Learner),10]="no"
@@ -461,7 +469,7 @@ Hyp3-4
 <<>>=
 
 library(lme4)
-tmp=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),]
+tmp=DF_Dwell[-grep("Joint",DF_Dwell$primary.AOI),]
 
 model<-lmer(Event.Duration..ms.~Condition+(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
@@ -716,6 +724,9 @@ tmp$JointType=0
 tmp[grep("Joint",DF_Dwell$primary.AOI,invert = T),11]="beam"
 tmp[grep("Joint",DF_Dwell$primary.AOI,invert = F),11]="joint"
 
+m=glmer(Event.Duration..ms./1000~JointType*Condition+(1|Participant)+(1|Trial), family=poisson(),data = tmp)
+
+
 model<-lmer(Event.Duration..ms.~JointType+(1|Participant)+(1|Trial), data = subset(tmp,Condition=="static"),REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = subset(tmp,Condition=="static"),REML=FALSE)
 summary(model)
@@ -793,8 +804,6 @@ anova(model2,model)
 @
 
 
-
-
 HYP5:No differences in the number of AOI vistited between condition.(avg 16), nor between learners
 <<>>=
 DF_Dwells_Rank=read.csv("Desktop/DF_Dwells_Rank",sep = ",")
@@ -858,6 +867,7 @@ wilcox.test(AOI~Learner,data=subset(tmp,Trial==6))
 wilcox.test(AOI~Learner,data=subset(tmp,Trial==7))
 
 @
+
 
 HYP6:Check the ranking of the AOIs. they are pretty omogeneous until the structures with two forces. Then, something changes in the order of visiting. Expecially, for the last joints.
 <<>>=
@@ -964,8 +974,8 @@ plotmeans(Rank~interaction(Condition,AOI),data=subset(DF_Dwells_Rank[grep("Joint
 Hyp 8:The revisit dwell is pretty much the same. The length 1 is the more frequent.
 <<>>=
 library("plyr")
-DF_RevisitJoint=read.csv("Desktop/Luzern_Analysis/DF_Dwells_Revisit_Joints",sep=",")
-DF_Learner=read.csv("Desktop/Luzern_Analysis/Learners.csv",sep=",")
+DF_RevisitJoint=read.csv("DF_Dwells_Revisit_Joints",sep=",")
+DF_Learner=read.csv("Learners.csv",sep=",")
 DF_RevisitJoint=merge(DF_RevisitJoint,DF_Learner,by=c("Participant"))
 
 DF_RevisitJoint[grep("0",DF_RevisitJoint$Learner),7]="no"
@@ -1186,8 +1196,22 @@ write.csv(Saliency_Learner,"Desktop/Saliency_Learner",row.names = FALSE)
 @
 
 
+<<>>=
+tmp=DF_Dwell
+tmp$JointType=0
+tmp[grep("Joint",DF_Dwell$primary.AOI,invert = T),11]="beam"
+tmp[grep("Joint",DF_Dwell$primary.AOI,invert = F),11]="joint"
+
+model<-lmer(log(Event.Duration..ms.)~Condition:JointType+JointType+(1|Participant)+(1|Trial), data = tmp)
+plot(model)
+
+model2<-glmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
+summary(model)
+anova(model2,model)
 
 
+
+@
 
 
 
