@@ -76,8 +76,15 @@ m=lmer(data=DF_Duration,Duration/1000~Condition+(1|Trial))
 m_null=lmer(data=DF_Duration,Duration/1000~(1|Trial))
 
 anova(m,m_null,test="Chi")
-qplot(data=DF_Duration,x=Trial,y=Duration/1000, fill=Condition, geom="boxplot")
+qplot(data=DF_Duration,x=Trial,y=Duration/60000, fill=Condition, geom="boxplot")
 
+DF_Duration_Summary=DF_Duration%>%group_by(Condition,Trial)%>%summarise(meanD=mean(Duration)/1000, ci=1.96*sd(Duration)/(1000*sqrt(12)))
+ggplot(DF_Duration_Summary, aes(x=as.numeric(Trial), y=meanD, colour=Condition)) + 
+    geom_errorbar(aes(ymin=meanD-ci, ymax=meanD+ci), width=.5, position=position_dodge(0.1)) +
+    geom_line(position=position_dodge(0.1),size=1) +
+    geom_point(position=position_dodge(0.1),size=2)+labs(x="Trial",y="Duration (s)")+
+    scale_x_continuous(breaks = c(1:8))+
+    scale_color_discrete(name="Feedback", labels=c("Verbal","Tangible"))
 @
 
 No difference between learners and non-learners
@@ -303,6 +310,12 @@ wilcox.test(Event.Duration..ms..x/Event.Duration..ms..y ~Condition,data=tmp3)
 wilcox_test( tmp3$Perc ~ tmp3$Condition,distribution="exact")
 effect_size=2.7713/sqrt(24)
 
+DF_Learner=read.csv("Learners.csv",sep=",")
+tmp3=merge(tmp3,DF_Learner,by=c("Participant"))
+tmp3$Learner=ifelse(tmp3$Learner>0,T,F)
+
+m=(glm(data=tmp3,Learner~Perc,family = binomial()))
+
 
 tmp=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Fixations[grep("Joint",DF_Fixations$primary.AOI),],FUN=sum)
 tmp2=aggregate(Event.Duration..ms.  ~ Participant+Trial+Condition,data=DF_Fixations,FUN=sum)
@@ -469,7 +482,7 @@ Hyp3-4
 <<>>=
 
 library(lme4)
-tmp=DF_Dwell[-grep("Joint",DF_Dwell$primary.AOI),]
+tmp=DF_Dwell[grep("Joint",DF_Dwell$primary.AOI),]
 
 model<-lmer(Event.Duration..ms.~Condition+(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
 model2<-lmer(Event.Duration..ms.~(1|Participant)+(1|Trial), data = tmp,REML=FALSE)
@@ -1140,6 +1153,7 @@ anova(model2,model)
 DF_Dwell=read.csv("Desktop/DF_Dwells",sep=",")
 DF_Learner=read.csv("Desktop//Learners.csv",sep=",")
 DF_Dwell=merge(DF_Dwell,DF_Learner,by=c("Participant"))
+
 tmp=aggregate(Event.Duration..ms.~Participant+Trial+Condition+Learner,data=DF_Dwell,FUN=length)
 Saliency=aggregate(Event.Duration..ms.~Participant+Trial+Condition+Learner+primary.AOI,data=DF_Dwell,FUN=length)
 Saliency=merge(Saliency,tmp,by=c("Participant","Trial","Condition","Learner"))
