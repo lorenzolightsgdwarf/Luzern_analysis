@@ -76,7 +76,8 @@ m=lmer(data=DF_Duration,Duration/1000~Condition+(1|Trial))
 m_null=lmer(data=DF_Duration,Duration/1000~(1|Trial))
 
 anova(m,m_null,test="Chi")
-qplot(data=DF_Duration,x=Trial,y=Duration/60000, fill=Condition, geom="boxplot")
+qplot(data=subset(DF_Duration,Duration/1000<250),x=Trial,y=Duration/1000, fill=Condition, geom="boxplot")+labs(x="Trial",y="Duration (s)")+scale_fill_manual(values=c("#00bfc4", "#f8766d"), name="Feedback", breaks = c("tangible", "static"),labels=c("Tangible","Verbal"))+theme(text = element_text(size=20))
+  
 
 DF_Duration_Summary=DF_Duration%>%group_by(Condition,Trial)%>%summarise(meanD=mean(Duration)/1000, ci=1.96*sd(Duration)/(1000*sqrt(12)))
 ggplot(DF_Duration_Summary, aes(x=as.numeric(Trial), y=meanD, colour=Condition)) + 
