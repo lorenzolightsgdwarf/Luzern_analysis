@@ -27,7 +27,7 @@ qplot(data=melt_score,x=variable,y=value,fill=Group,geom="boxplot")+
 
 #Plotting RLG
 qplot(data=only_score,x=Group,y=RLG,geom="boxplot",fill=Group)+labs(x="Feedback",y="Relative Learning Gain")+
-  scale_x_discrete( labels=c("Tangible","Verbal"))+ guides(fill=FALSE)+theme(text = element_text(size=20))
+  scale_x_discrete( labels=c("Tangible","Verbal"))+ guides(fill=FALSE)+theme(text = element_text(size=20))+geom_point(size=2)
 
 #Experiment scores
 experiment_score=only_score[,c(1,2,35:42)]
@@ -61,14 +61,61 @@ ggplot(experiment_score_summary, aes(x=as.numeric(variable), y=meanD, colour=Gro
   geom_segment(aes(x=4,xend=4,y=3,yend=2.95),color="black",size=0.1)+annotate("text",x=4,y=3.08,label="t=2.99, p=0.003")+
   geom_segment(aes(x=8,xend=8,y=3,yend=2.95),color="black",size=0.1)+annotate("text",x=8,y=3.08,label="t=4.45, p<0.0001")
 
+ggplot(experiment_score_summary, aes(y=as.numeric(variable), x=meanD, colour=Group)) + 
+  geom_errorbarh(aes(xmin=meanD-ci, xmax=meanD+ci), width=.5, position=position_dodge(0.1)) +
+  geom_point(position=position_dodge(0.1),size=2)+labs(x="Score",y="Trial")+
+  scale_y_continuous(breaks = c(1:8),)+
+  scale_color_discrete(name="Feedback", labels=c("Tangible","Verbal"))+theme(text = element_text(size=20))+theme_classic(base_size = 20)+
+  annotate("text",x=3.1,y=4.0,label="t=2.99, p=0.003",size=4,angle=-90)+
+  annotate("text",x=3.1,y=8.0,label="t=4.45, p<0.0001",size=4,angle=-90)
+  
+#
+
+dist_scores=only_score[,c(1,2,66:68)]
+dist_scores=melt(dist_scores,id.vars = c("ID","Group"))
+m=lm(data=dist_scores,value~variable)
+m1=lm(data=dist_scores,value~variable+Group)
+
+test=raw_data[,c(1,2,seq(12,52,2),seq(175,215,2),seq(54,100,2))]
+test=melt(test,id.vars = c("ID","Group"))
+test$correct=ifelse(test$value=="right answer",1,0)
+test$Phase=str_split_fixed(test$variable, "_",4)[,1]
+test$Q=str_split_fixed(test$variable, "_",4)[,2]
+test$Element=str_split_fixed(test$variable, "_",4)[,3]
+test$Phase=ifelse(test$Phase=="Pre2","Pre",test$Phase)
+AOI=read.csv("AOI_table.csv")
+test=merge(test,AOI[,c(1:4,6)],by.x = c("Phase","Q","Element"),by.y=c("Phase","Trial","AOI"))
 
 
+test$Connections=as.factor(test$Connections)
+test$Distance=as.factor(test$Distance)
+m=glmer(data=test,correct~as.factor(Distance)+(1|Phase),family=binomial())
+summary(m)
 
+
+m=glm(data=test,correct~as.numeric(Connections),family=quasibinomial())
+anova(m,test="Chi")
+m=glm(data=test,correct~as.factor(Distance),family=quasibinomial())
+anova(m,test="Chi")
+
+m1=glm(data=test,correct~as.numeric(Connections)+Phase,family=quasibinomial())
+
+m=glm(data=test,correct~as.numeric(Distance),family=quasibinomial())
+anova(m,test="Chi")
+
+m1=glm(data=test,correct~Distance,family=binomial())
+m2=glm(data=test,correct~Connections*Group,family=quasibinomial())
+
+test_sum=test%>%dplyr::filter(Phase=="Exp")%>%dplyr::group_by(ID,Group,Connections)%>%dplyr::summarise(corrects=sum(correct),total=n())
+
+m=glm(data=test_sum,corrects~as.numeric(Connections)+as.numeric(Connections):Group,offset = log(total),family=quasipoisson())
 
 #Eye Tracking 
 DF_Experts=read.csv("DF_Experts.csv",sep=",")
 DF_Fixations=read.csv("DF_Fixations",sep=",")
 DF_Fixations_Full=DF_Fixations
+
+
 
 colnames(DF_Fixations_Full)=colnames(DF_Experts[,c(1,8,10,3,5,4,11,9)])
 DF_Fixations_Full=rbind(DF_Experts[,c(1,8,10,3,5,4,11,9)],DF_Fixations_Full)
@@ -76,6 +123,7 @@ DF_Fixations_Full$Trial=as.factor(DF_Fixations_Full$Trial)
 
 rm(DF_Experts)
 rm(DF_Fixations)
+DF_Fixations_Full=merge(DF_Fixations_Full,subset(AOI,Phase=="Exp"&Trial<8)[,c("Trial","AOI")],by.x = c("Trial","primary.AOI"),by.y = c("Trial","AOI"))
 
 #Joint Perc
 
@@ -111,6 +159,7 @@ LearnerFocus=subset(JointFocus,Condition!="Expert")
 LearnerFocus=merge(LearnerFocus,only_score[,c("ID","RLG")],by.x = "Participant",by.y="ID")
 m=lmer(data=LearnerFocus,prop~RLG+(1|Trial))
 drop1(m,test="Chi")
+cor.test(LearnerFocus$prop,LearnerFocus$RLG)
 
 
 #KL Divergence
@@ -127,22 +176,38 @@ rm(tmp)
 Saliency_Expert=Saliency%>%dplyr::filter(Condition=="Expert")%>%dplyr::group_by(Trial,primary.AOI)%>%dplyr::summarise(meanFixProp=sum(prop)/6)
 Saliency_Expert=Saliency_Expert%>%dplyr::group_by(Trial)%>%dplyr::mutate(meanFixProp=meanFixProp/sum(meanFixProp))
 
-Saliency=merge(Saliency,Saliency_Expert,by = c("Trial","primary.AOI"), all = T)
+cross_product=unique(Saliency[,c("Participant","Condition")])
 
-Saliency[is.na(Saliency)]=0.0000001
+cross_product=merge(cross_product,Saliency_Expert, by = NULL)
 
-KL=Saliency%>%dplyr::group_by(Trial,Condition,Participant)%>%dplyr::summarise(KL=sum(prop*log(prop/meanFixProp)))
+Saliency=merge(cross_product,Saliency,all= T)
 
-m=lmer(data=subset(KL,Condition!="Expert"&KL<1),log(KL)~Condition+(1|Trial))
+Saliency=subset(Saliency,Participant!=13 | Trial!=7)
+Saliency=subset(Saliency,Participant!=20 | Trial!=1)
+
+#Saliency=merge(Saliency,Saliency_Expert,by = c("Trial","primary.AOI"),all.y = T)
+
+Saliency[is.na(Saliency)]=0.000000000001
+
+KL=Saliency%>%dplyr::group_by(Trial,Condition,Participant)%>%dplyr::summarise(KL=sum(meanFixProp*log(meanFixProp/prop)))
+
+m=lmer(data=subset(KL,Condition!="Expert"),log(KL)~Condition+(1|Trial))
 summary(m)
 drop1(m,test="Chi")
+qqnorm(resid(m))
+qqline(resid(m))
+
+qplot(data=subset(KL,Condition!="Expert"&KL<10),x=as.factor(Trial),y=KL,fill=as.factor(Condition),geom="boxplot")+
+  labs(x="Trial",y="KL Divergence")+
+  scale_fill_manual(values=c("#00bfc4", "#f8766d"), name="Condition", 
+                    breaks = c("tangible", "static"),labels=c("Tangible","Verbal"))+
+  theme(text = element_text(size=20))
 
 qplot(data=subset(KL,Condition!="Expert"&KL<1),x=as.factor(Trial),y=KL,fill=as.factor(Condition),geom="boxplot")+
   labs(x="Trial",y="KL Divergence")+
   scale_fill_manual(values=c("#00bfc4", "#f8766d"), name="Condition", 
                     breaks = c("tangible", "static"),labels=c("Tangible","Verbal"))+
   theme(text = element_text(size=20))
-
 
 KL_plot=KL%>%dplyr::filter(KL<1)%>%dplyr::group_by(Trial,Condition)%>%dplyr::summarise(meanP=mean(KL),ci=sd(KL)*1.96/sqrt(n()),participants=n())
 
@@ -158,10 +223,13 @@ ggplot(subset(KL_plot,Condition!="Expert"), aes(x=as.numeric(Trial), y=meanP, co
 KL_Learner=subset(KL,Condition!="Expert")
 
 KL_Learner=merge(KL_Learner,only_score[,c("ID","RLG")],by.x = "Participant",by.y="ID")
-m=lmer(data=subset(KL_Learner,KL<1),KL~RLG+(1|Trial))
+m=lmer(data=subset(KL_Learner,KL<1),log(KL)~RLG+(1|Trial))
 drop1(m,test="Chi")
 
-qplot(data=KL_Learner,x=RLG,y=KL,facets = .~Trial)
+qplot(data=KL_Learner,x=RLG,y=log(KL),facets = .~Trial)
+
+cor.test(subset(KL_Learner,KL<1)$RLG,log(subset(KL_Learner,KL<1)$KL))
+
 
 ###   Trial Score
 
@@ -177,7 +245,7 @@ qplot(data=KL_Learner,x=RLG,y=KL,facets = .~Trial)
  m=glmer(data=subset(KL_Trial_Score,KL<1),value~KL+(1|Trial),family=poisson())
  drop1(m,test="Chi")
   
- cor.test(subset(KL_Trial_Score,KL<1)$value,subset(KL_Trial_Score,KL<1)$KL,method = "spearman")
+ cor.test(subset(KL_Trial_Score,KL>-1)$value,subset(KL_Trial_Score,KL>-1)$KL,method = "spearman")
 
  
  
@@ -371,7 +439,7 @@ qplot(data=KL_Learner,x=RLG,y=KL,facets = .~Trial)
  recall_data=subset(recog_data,measure=="TP")
  recall_data$recall=ifelse(grepl("Exp",recall_data$phase),recall_data$value/8,recall_data$value/7)
  levels(recall_data$force)<-c("Compression","Tension","Zero-Force")
- qplot(data=recall_data,x = phase,y=recall,geom="boxplot")+facet_wrap(~as.factor(force),)+
+ qplot(data=recall_data,x = phase,y=value,geom="boxplot")+facet_wrap(~as.factor(force),)+
    scale_x_discrete( labels=c("Pre-Test", "Intervention", "Post-Test"))+labs(x="Phase",y="True Positive Rate")
  
  qplot(data=recall_data,x = force,y=recall,geom="boxplot")+facet_wrap(~as.factor(phase))
@@ -406,7 +474,7 @@ qplot(data=KL_Learner,x=RLG,y=KL,facets = .~Trial)
    
    
    
-   change_of_mind=raw_data[,c(1,2,seq(11,52,2),seq(174,215,2))]
+ change_of_mind=raw_data[,c(1,2,seq(11,52,2),seq(174,215,2))]
  change_of_mind=melt(change_of_mind,id.vars = c(1,2))
  change_of_mind$phase=ifelse(grepl("Pre",change_of_mind$variable),"Pre",ifelse(grepl("Post",change_of_mind$variable),"Post","Exp"))
  change_of_mind$Q=substring(change_of_mind$variable,5)
@@ -671,8 +739,8 @@ qplot(data=KL_Learner,x=RLG,y=KL,facets = .~Trial)
  confusion_pre$Given_Answer=factor(c("Tension","Tension","Tension","Compression","Compression","Compression","Zero-Force","Zero-Force","Zero-Force"), levels = c("Tension","Compression","Zero-Force"))
  confusion_pre$perc=round(100*confusion_pre$value/168)
  qplot(data=confusion_pre,x=Given_Answer,y=Correct_answer,geom="tile",fill=perc)+
-   geom_text(aes(label=paste(perc,"%","(",value,")")))+scale_fill_gradient2(low="white",high = "red")+
-   theme(axis.text.y= element_text(angle = 90,hjust = 0.5))+theme(legend.position="none")+labs(x="Given Answer",y="Correct Answer")
+   geom_text(aes(label=paste(perc,"%","\n(",value,")",sep = "")),size=12)+scale_fill_gradient2(low="white",high = "red")+
+   theme(axis.text.x = element_text(size=19),axis.text.y= element_text(angle = 90,hjust = 0.5,size=19))+theme(legend.position="none",text = element_text(size = 20))+labs(x="Given Answer",y="Correct Answer")
  
  confusion_post=confusion_post_tangible+confusion_post_verbal
  confusion_post=melt(as.data.frame(confusion_post))
@@ -682,8 +750,8 @@ qplot(data=KL_Learner,x=RLG,y=KL,facets = .~Trial)
  confusion_post$Given_Answer=factor(c("Tension","Tension","Tension","Compression","Compression","Compression","Zero-Force","Zero-Force","Zero-Force"), levels = c("Tension","Compression","Zero-Force"))
  confusion_post$perc=round(100*confusion_post$value/168)
  qplot(data=confusion_post,x=Given_Answer,y=Correct_answer,geom="tile",fill=perc)+
-   geom_text(aes(label=paste(perc,"%","(",value,")")))+scale_fill_gradient2(low="white",high = "red")+
-   theme(axis.text.y= element_text(angle = 90,hjust = 0.5))+theme(legend.position="none")+labs(x="Given Answer",y="Correct Answer")
+   geom_text(aes(label=paste(perc,"%","\n(",value,")",sep = "")),size=12)+scale_fill_gradient2(low="white",high = "red")+
+   theme(axis.text.x = element_text(size=19),axis.text.y= element_text(angle = 90,hjust = 0.5,size=19),text=element_text(size=20))+theme(legend.position="none")+labs(x="Given Answer",y="Correct Answer")
  
  confusion_exp=confusion_exp_tangible+confusion_exp_verbal
  confusion_exp=melt(as.data.frame(confusion_exp))
@@ -693,36 +761,94 @@ qplot(data=KL_Learner,x=RLG,y=KL,facets = .~Trial)
  confusion_exp$Given_Answer=factor(c("Tension","Tension","Tension","Compression","Compression","Compression","Zero-Force","Zero-Force","Zero-Force"), levels = c("Tension","Compression","Zero-Force"))
  confusion_exp$perc=round(100*confusion_exp$value/168)
  qplot(data=confusion_exp,x=Given_Answer,y=Correct_answer,geom="tile",fill=perc)+
-   geom_text(aes(label=paste(perc,"%","(",value,")")))+scale_fill_gradient2(low="white",high = "red")+
-   theme(axis.text.y= element_text(angle = 90,hjust = 0.5))+theme(legend.position="none")+labs(x="Given Answer",y="Correct Answer")
+   geom_text(aes(label=paste(perc,"%","\n(",value,")",sep = "")),size=12)+scale_fill_gradient2(low="white",high = "red")+
+   theme(axis.text.x = element_text(size=19),axis.text.y= element_text(angle = 90,hjust = 0.5,size=19),text = element_text(size=20))+theme(legend.position="none")+labs(x="Given Answer",y="Correct Answer")
  
+ 
+ 
+ tmp=raw_data_copy
+ for(j in seq(11,52,2))  
+  tmp[,j]=paste(tmp[,j+1],tmp[,j])
+ for(j in seq(174,215,2))  
+   tmp[,j]=paste(tmp[,j+1],tmp[,j])
+ for(j in seq(53,100,2))  
+   tmp[,j]=paste(tmp[,j+1],tmp[,j])
+ 
+ tmp=tmp[,c(1,2,seq(11,52,2),seq(174,215,2),seq(53,100,2))]
+ tmp=reshape2::melt(tmp,c(1,2))
+ tmp$variable=ifelse(grepl(as.character(tmp$variable),pattern = "Pre"),"Pre",ifelse(grepl(as.character(tmp$variable),pattern = "Post"),"Post","Exp"))
+ 
+ tmp=tmp%>%dplyr::group_by(ID,Group,variable,value)%>%dplyr::summarise(count=n())
+ 
+ qplot(data=subset(tmp,value=="Druck/Compression Null/Zero" | value=="Druck/Compression Zug/Tension"),x=value,y=count,facets=.~variable,fill=Group,geom="boxplot")
+ 
+ m=glmer(data=tmp,count~value+(1|variable),family=poisson())
+ m=glm(data=tmp,count~value*variable,family=quasipoisson())
+ 
+ 
+ 
+ ###Exploration time
+ 
+ exploration_time=read.csv("Exploration time.csv",na.strings = "na")
+ exploration_time$Trial.1=as.numeric(exploration_time$Trial.1)
+ exploration_time$Trial.2=as.numeric(exploration_time$Trial.2)
+ exploration_time$Trial.3=as.numeric(exploration_time$Trial.3)
+ exploration_time$Trial.4=as.numeric(exploration_time$Trial.4)
+ exploration_time$Trial.5=as.numeric(exploration_time$Trial.5)
+ exploration_time$Trial.6=as.numeric(exploration_time$Trial.6)
+ exploration_time$Trial.7=as.numeric(exploration_time$Trial.7)
+ exploration_time$Trial.8=as.numeric(exploration_time$Trial.8)
+ 
+ 
+ exploration_time_with_replace=exploration_time
+ 
+ median(subset(exploration_time_with_replace,Condition=="tangible")$Trial.1,na.rm = T)
+ exploration_time_with_replace[22,3]=120
+ median(subset(exploration_time_with_replace,Condition!="tangible")$Trial.7,na.rm = T)
+ exploration_time_with_replace[7,9]=70
+ 
+ exploration_time_with_replace
+ exploration_time_with_replace=merge(exploration_time_with_replace,only_score[,c("ID","RLG","Post_tot_Score","Exp_tot_Score")],by="ID")
+ 
+ qplot(data=exploration_time_with_replace,x=Trial.1,y=RLG,facets = .~Condition,geom="point")
+ 
+ cor.test(subset(exploration_time_with_replace,Condition=="tangible")$Trial.1,subset(exploration_time_with_replace,Condition=="tangible")$RLG,method = "spearman")
+ cor.test(subset(exploration_time_with_replace,Condition=="tangible")$Trial.1,subset(exploration_time_with_replace,Condition=="tangible")$Post_tot_Score)
+ cor.test(subset(exploration_time_with_replace,Condition=="tangible")$Trial.1,subset(exploration_time_with_replace,Condition=="tangible")$Exp_tot_Score)
+ 
+ cor.test(subset(exploration_time_with_replace,Condition=="tangible")$Trial.2,subset(exploration_time_with_replace,Condition=="tangible")$RLG)
+ cor.test(subset(exploration_time_with_replace,Condition=="tangible")$Trial.2,subset(exploration_time_with_replace,Condition=="tangible")$Post_tot_Score)
+ cor.test(subset(exploration_time_with_replace,Condition=="tangible")$Trial.2,subset(exploration_time_with_replace,Condition=="tangible")$Exp_tot_Score)
+ 
+ cor.test(subset(exploration_time_with_replace,Condition!="tangible")$Trial.1,subset(exploration_time_with_replace,Condition!="tangible")$RLG)
+ cor.test(subset(exploration_time_with_replace,Condition!="tangible")$Trial.1,subset(exploration_time_with_replace,Condition!="tangible")$Post_tot_Score)
+ cor.test(subset(exploration_time_with_replace,Condition!="tangible")$Trial.1,subset(exploration_time_with_replace,Condition!="tangible")$Exp_tot_Score)
+ 
+ cor.test(subset(exploration_time_with_replace,Condition!="tangible")$Trial.2,subset(exploration_time_with_replace,Condition!="tangible")$RLG)
+ cor.test(subset(exploration_time_with_replace,Condition!="tangible")$Trial.2,subset(exploration_time_with_replace,Condition!="tangible")$Post_tot_Score)
+ cor.test(subset(exploration_time_with_replace,Condition!="tangible")$Trial.2,subset(exploration_time_with_replace,Condition!="tangible")$Exp_tot_Score)
+ 
+ cor.test(subset(exploration_time_with_replace,Condition!="tangible")$sum,subset(exploration_time_with_replace,Condition!="tangible")$RLG)
+ cor.test(subset(exploration_time_with_replace,Condition!="tangible")$sum,subset(exploration_time_with_replace,Condition!="tangible")$Post_tot_Score)
+ cor.test(subset(exploration_time_with_replace,Condition!="tangible")$sum,subset(exploration_time_with_replace,Condition!="tangible")$Exp_tot_Score)
+ 
+ cor.test(subset(exploration_time_with_replace,Condition=="tangible")$sum,subset(exploration_time_with_replace,Condition!="tangible")$RLG)
+ cor.test(subset(exploration_time_with_replace,Condition=="tangible")$sum,subset(exploration_time_with_replace,Condition!="tangible")$Post_tot_Score)
+ cor.test(subset(exploration_time_with_replace,Condition=="tangible")$sum,subset(exploration_time_with_replace,Condition!="tangible")$Exp_tot_Score)
+ 
+ 
+ exploration_time_with_replace$sum=rowSums(exploration_time_with_replace[,c(3:9)])
+ qplot(data=exploration_time_with_replace,x=sum,y=Post_tot_Score,facets = .~Condition,geom="point")
+ 
+ qplot(data=exploration_time_with_replace,x=Condition,y=sum,geom="point")
+ 
+ qplot(data=exploration_time_with_replace,x=sum,y=Post_tot_Score,geom="smooth")
+ qplot(data=exploration_time_with_replace,x=sum,y=Exp_tot_Score,geom="smooth")
+ qplot(data=exploration_time_with_replace,x=sum,y=RLG,geom="smooth")
 
- 
-
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
- 
-  
- 
+ qplot(data=exploration_time_with_replace,x=Trial.1,y=Exp_tot_Score,geom="smooth")
+ qplot(data=exploration_time_with_replace,x=Trial.1,y=Post_tot_Score,geom="smooth")
+ qplot(data=exploration_time_with_replace,x=Trial.1,y=RLG,geom="smooth")
  
  
 #Start garbage
@@ -1031,8 +1157,9 @@ recog_data$measure=ifelse(grepl("TP",recog_data$variable),"TP","FP")
 recall_data=subset(recog_data,measure=="TP")
 recall_data$recall=ifelse(grepl("Exp",recall_data$phase),recall_data$value/8,recall_data$value/7)
 levels(recall_data$force)<-c("Compression","Tension","Zero-Force")
-qplot(data=recall_data,x = phase,y=recall,fill=phase,geom="boxplot")+facet_wrap(~force,labeller=labeller(force=c("comp"="Compression","tens"="Tension","zero"="Zero-Force")))+
-  scale_fill_brewer(palette = "Set2")+scale_x_discrete( labels=c("Pre-Test", "Intervention", "Post-Test"))+labs(x="Phase",y="True Positive Rate")+theme(text = element_text(size=20))+theme(legend.position="none")
+recall_data$phase=factor(recall_data$phase,levels(recall_data$phase)[c(3,1,2)])
+qplot(data=recall_data,x = phase,y=recall,fill=as.factor(phase),geom="boxplot")+facet_wrap(~force,labeller=labeller(force=c("comp"="Compression","tens"="Tension","zero"="Zero-Force")))+
+  scale_fill_brewer(palette = "Set2")+scale_x_discrete( breaks=c("Pre","Exp","Post"),labels=c("Pre-Test", "Intervention", "Post-Test"))+labs(x="Phase",y="True Positive Rate")+theme(text = element_text(size=20))+theme(legend.position="none")
 
 qplot(data=recall_data,x = force,y=recall,geom="boxplot")+facet_wrap(~as.factor(phase))
 
@@ -1043,8 +1170,13 @@ recall_data$force=as.factor(recall_data$force)
 summary(multcomp::glht(m,mcp(force="Tukey")))
 
 m=lm(data=recall_data, recall~force+phase+force:phase)
+m1=lm(data=recall_data, recall~interaction(force,phase))
+m2=lm(data=recall_data, recall~force+phase)
 lsmeans(m, list(pairwise ~ force|phase))
+lsmeans(m, list(pairwise ~ phase))
+lsmeans(m, list(pairwise ~ force))
 
+lsmeans(m, list(pairwise ~ phase|force))
 
 precision_data=dcast(recog_data, ID+Group+phase+force~measure,value.var = "value")
 precision_data$precision=precision_data$TP/(precision_data$TP+precision_data$FP)
